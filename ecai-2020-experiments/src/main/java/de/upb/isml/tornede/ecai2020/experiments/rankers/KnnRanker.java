@@ -10,7 +10,7 @@ import ai.libs.jaicore.ml.tsc.distances.ITimeSeriesDistance;
 import de.upb.isml.tornede.ecai2020.experiments.storage.DatasetFeatureRepresentationMap;
 import de.upb.isml.tornede.ecai2020.experiments.storage.PipelinePerformanceStorage;
 
-public class KnnRanker implements IdBasedRanker {
+public class KnnRanker extends NonRandomIdBasedRanker {
 
 	private PipelinePerformanceStorage pipelinePerformanceStorage;
 	private DatasetFeatureRepresentationMap datasetFeatureRepresentationMap;

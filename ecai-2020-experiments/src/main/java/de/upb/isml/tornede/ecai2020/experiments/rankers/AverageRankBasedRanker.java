@@ -11,7 +11,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import ai.libs.jaicore.basic.sets.Pair;
 import de.upb.isml.tornede.ecai2020.experiments.storage.PipelinePerformanceStorage;
 
-public class AverageRankBasedRanker implements IdBasedRanker {
+public class AverageRankBasedRanker extends NonRandomIdBasedRanker {
 
 	private PipelinePerformanceStorage pipelinePerformanceStorage;
 	private List<Integer> pipelineIds;

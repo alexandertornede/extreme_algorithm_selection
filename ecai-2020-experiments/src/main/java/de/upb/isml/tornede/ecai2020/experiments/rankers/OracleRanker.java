@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import ai.libs.jaicore.basic.sets.Pair;
 import de.upb.isml.tornede.ecai2020.experiments.storage.PipelinePerformanceStorage;
 
-public class OracleRanker implements IdBasedRanker {
+public class OracleRanker extends NonRandomIdBasedRanker {
 
 	private PipelinePerformanceStorage pipelinePerformanceStorage;
 

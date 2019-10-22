@@ -14,7 +14,7 @@ import ai.libs.jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import de.upb.isml.tornede.ecai2020.experiments.storage.DatasetFeatureRepresentationMap;
 import de.upb.isml.tornede.ecai2020.experiments.storage.PipelineFeatureRepresentationMap;
 
-public class DyadRankingBasedRanker implements IdBasedRanker {
+public class DyadRankingBasedRanker extends NonRandomIdBasedRanker {
 
 	private int numberOfPairwiseComparisonsPerTrainingDataset;
 	private PLNetDyadRanker dyadRanker;
