@@ -26,7 +26,7 @@ import de.upb.isml.tornede.ecai2020.experiments.utils.Util;
 
 public class ExperimentRunner {
 
-	private static String databaseName = "conference_ci-workshop2019"; // "conference_ci-workshop2019"
+	private static String databaseName = "conference_ecai2020";
 	private static String tableName = "all_results_rank_all_with_values_with_smo";
 
 	private static String pathToStoredRankingModels = "rankersMCCV";
@@ -45,9 +45,9 @@ public class ExperimentRunner {
 
 			SQLAdapter sqlAdapter = new SQLAdapter("isys-db.cs.upb.de:3306", "user", "password", databaseName, true);
 
-			PipelineFeatureRepresentationMap pipelineFeatureMap = new PipelineFeatureRepresentationMap(sqlAdapter, "dyad_dataset_approach_5_performance_samples_with_SMO"); // "dyad_dataset_approach_5_performance_samples_with_SMO"
-			DatasetFeatureRepresentationMap datasetFeatureMap = new DatasetFeatureRepresentationMap(sqlAdapter, "dataset_metafeatures_mirror"); // "dataset_metafeatures_mirror"
-			PipelinePerformanceStorage pipelinePerformanceStorage = new PipelinePerformanceStorage(sqlAdapter, "pipeline_performance_5_classifiers_with_SMO"); // "pipeline_performance_5_classifiers_with_SMO"
+			PipelineFeatureRepresentationMap pipelineFeatureMap = new PipelineFeatureRepresentationMap(sqlAdapter, "pipeline_feature_representations");
+			DatasetFeatureRepresentationMap datasetFeatureMap = new DatasetFeatureRepresentationMap(sqlAdapter, "dataset_metafeatures");
+			PipelinePerformanceStorage pipelinePerformanceStorage = new PipelinePerformanceStorage(sqlAdapter, "pipeline_evaluations");
 
 			AveragePerformanceRanker averageRankRanker = new AveragePerformanceRanker(pipelinePerformanceStorage);
 			KnnRanker onennRanker = new KnnRanker(pipelinePerformanceStorage, datasetFeatureMap, new EuclideanDistance(), 1);
@@ -55,7 +55,6 @@ public class ExperimentRunner {
 			AverageRankBasedRanker averageRankBasedRanker = new AverageRankBasedRanker(pipelinePerformanceStorage);
 
 			List<IdBasedRanker> rankers = new ArrayList<>(Arrays.asList(averageRankRanker, onennRanker, twonnRanker, averageRankBasedRanker));
-			// List<IdBasedRanker> rankers = new ArrayList<>(Arrays.asList(averageRankRanker, onennRanker, averageRankBasedRanker));
 
 			for (int numberOfPairwiseSamplesPerDataset : numberOfPairwiseSamplesPerDatasetSizes) {
 				PLNetDyadRanker dyadRanker = getDyadRankerForNumberOfPairwiseSamples(numberOfPairwiseSamplesPerDataset, datasetTestSplitId);
