@@ -1,43 +1,62 @@
-package de.upb.isml.tornede.ecai2020.experiments.rankers;
+package de.upb.isml.tornede.ecai2020.experiments.rankers.dyad;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.aeonbits.owner.ConfigFactory;
+
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.ml.core.exception.PredictionException;
+import ai.libs.jaicore.ml.core.exception.TrainingException;
 import ai.libs.jaicore.ml.dyadranking.Dyad;
+import ai.libs.jaicore.ml.dyadranking.algorithm.IPLNetDyadRankerConfiguration;
 import ai.libs.jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
+import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import ai.libs.jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
+import de.upb.isml.tornede.ecai2020.experiments.rankers.IdBasedRanker;
 import de.upb.isml.tornede.ecai2020.experiments.storage.DatasetFeatureRepresentationMap;
 import de.upb.isml.tornede.ecai2020.experiments.storage.PipelineFeatureRepresentationMap;
 
-public class DyadRankingBasedRanker extends NonRandomIdBasedRanker {
-
-	private int numberOfPairwiseComparisonsPerTrainingDataset;
-	private PLNetDyadRanker dyadRanker;
+public class RealDyadRankingBasedRanker implements IdBasedRanker {
 
 	private PipelineFeatureRepresentationMap pipelineFeatureRepresentationMap;
 	private DatasetFeatureRepresentationMap datasetFeatureRepresentationMap;
 
-	public DyadRankingBasedRanker(int numberOfPairwiseComparisonsPerTrainingDataset, PLNetDyadRanker dyadRanker, PipelineFeatureRepresentationMap pipelineFeatureRepresentationMap,
-			DatasetFeatureRepresentationMap datasetFeatureRepresentationMap) {
-		this.numberOfPairwiseComparisonsPerTrainingDataset = numberOfPairwiseComparisonsPerTrainingDataset;
-		this.dyadRanker = dyadRanker;
+	private DyadRankingTrainingDatasetGenerator trainingDatasetGenerator;
+
+	private PLNetDyadRanker dyadRanker;
+
+	public RealDyadRankingBasedRanker(PipelineFeatureRepresentationMap pipelineFeatureRepresentationMap, DatasetFeatureRepresentationMap datasetFeatureRepresentationMap, DyadRankingTrainingDatasetGenerator trainingDatasetGenerator) {
 		this.pipelineFeatureRepresentationMap = pipelineFeatureRepresentationMap;
 		this.datasetFeatureRepresentationMap = datasetFeatureRepresentationMap;
+		this.trainingDatasetGenerator = trainingDatasetGenerator;
+	}
+
+	@Override
+	public void initialize(long randomSeed) {
+		trainingDatasetGenerator.initialize(randomSeed);
 	}
 
 	@Override
 	public void train(List<Integer> trainingDatasetIds) {
-		// nothing to do here as we assume the dyad ranker given in the constructor to be already trained
+		dyadRanker = new PLNetDyadRanker(ConfigFactory.create(IPLNetDyadRankerConfiguration.class));
+
+		DyadRankingDataset dataset = trainingDatasetGenerator.generateTrainingDataset(trainingDatasetIds);
+		// System.out.println("Start training of PLNET with " + dataset.size() + " rankings.");
+		try {
+			dyadRanker.train(dataset);
+		} catch (TrainingException e) {
+			System.err.println("Could not train dyad ranker: " + e);
+		}
+		// System.out.println("Finished training of PLNET");
+
 	}
 
 	@Override
 	public List<Pair<Integer, Double>> getRankingOfPipelinesOnDataset(List<Integer> pipelineIdsToRank, int datasetId) {
-
 		double[] featureRepresentationForDataset = datasetFeatureRepresentationMap.getFeatureRepresentationForDataset(datasetId);
 		List<Pair<Integer, Dyad>> pipelineIdDyadPairsToRank = pipelineIdsToRank.stream()
 				.map(id -> new Pair<>(id, new Dyad(new DenseDoubleVector(featureRepresentationForDataset), new DenseDoubleVector(pipelineFeatureRepresentationMap.getFeatureRepresentationForPipeline(id))))).collect(Collectors.toList());
@@ -61,7 +80,7 @@ public class DyadRankingBasedRanker extends NonRandomIdBasedRanker {
 
 	@Override
 	public String getName() {
-		return "dyad_" + numberOfPairwiseComparisonsPerTrainingDataset;
+		return "real_dyad_ranker_" + trainingDatasetGenerator.getName();
 	}
 
 }

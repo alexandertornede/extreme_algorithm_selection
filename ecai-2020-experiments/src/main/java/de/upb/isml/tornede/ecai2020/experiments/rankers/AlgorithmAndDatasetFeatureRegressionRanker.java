@@ -3,7 +3,10 @@ package de.upb.isml.tornede.ecai2020.experiments.rankers;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import ai.libs.jaicore.basic.sets.Pair;
@@ -17,7 +20,7 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class AlgorithmAndDatasetFeatureRegressionRanker extends NonRandomIdBasedRanker {
+public class AlgorithmAndDatasetFeatureRegressionRanker implements IdBasedRanker {
 
 	private PipelineFeatureRepresentationMap pipelineFeatureRepresentationMap;
 	private DatasetFeatureRepresentationMap datasetFeatureRepresentationMap;
@@ -28,12 +31,16 @@ public class AlgorithmAndDatasetFeatureRegressionRanker extends NonRandomIdBased
 
 	private ArrayList<Attribute> attributeInfo;
 
+	private int datasetSize;
+	private Random random;
+
 	public AlgorithmAndDatasetFeatureRegressionRanker(PipelineFeatureRepresentationMap pipelineFeatureRepresentationMap, DatasetFeatureRepresentationMap datasetFeatureRepresentationMap, PipelinePerformanceStorage pipelinePerformanceStorage,
-			Classifier regressionFunction) {
+			Classifier regressionFunction, int datasetSize) {
 		this.pipelineFeatureRepresentationMap = pipelineFeatureRepresentationMap;
 		this.datasetFeatureRepresentationMap = datasetFeatureRepresentationMap;
 		this.pipelinePerformanceStorage = pipelinePerformanceStorage;
 		this.nonTrainedRegressionFunction = regressionFunction;
+		this.datasetSize = datasetSize;
 	}
 
 	@Override
@@ -57,6 +64,8 @@ public class AlgorithmAndDatasetFeatureRegressionRanker extends NonRandomIdBased
 			}
 		}
 		System.out.println("Generated dataset with " + instances.size() + " instances.");
+		instances = sampleInstances(instances, datasetSize);
+		System.out.println("Sampled dataset down to " + instances.size() + " instances.");
 
 		try {
 			trainedRegressionFunction = AbstractClassifier.makeCopy(nonTrainedRegressionFunction);
@@ -177,6 +186,26 @@ public class AlgorithmAndDatasetFeatureRegressionRanker extends NonRandomIdBased
 		return attributes;
 	}
 
+	private Instances sampleInstances(Instances instances, int amount) {
+		// if we have nothing to sample or not enough, we return the original dataset
+		if (amount <= 0 || amount > instances.size()) {
+			return instances;
+		}
+		Instances sampledInstances = new Instances(instances.relationName() + "_" + amount, attributeInfo, amount);
+		sampledInstances.setClassIndex(sampledInstances.numAttributes() - 1);
+		Set<Integer> sampledIndices = new HashSet<>();
+		while (sampledInstances.size() < amount) {
+			int randomIndex = random.nextInt(instances.size());
+			if (!sampledIndices.contains(randomIndex)) {
+				sampledIndices.add(randomIndex);
+				Instance randomInstance = instances.get(randomIndex);
+				randomInstance.setDataset(sampledInstances);
+				sampledInstances.add(randomInstance);
+			}
+		}
+		return sampledInstances;
+	}
+
 	@Override
 	public List<Pair<Integer, Double>> getRankingOfPipelinesOnDataset(List<Integer> pipelineIdsToRank, int datasetId) {
 		Instances dummyInstances = new Instances("dummy", attributeInfo, 0);
@@ -196,7 +225,12 @@ public class AlgorithmAndDatasetFeatureRegressionRanker extends NonRandomIdBased
 
 	@Override
 	public String getName() {
-		return "2xfeature_regression";
+		return "2xfeature_regression_" + datasetSize;
+	}
+
+	@Override
+	public void initialize(long randomSeed) {
+		this.random = new Random(randomSeed);
 	}
 
 }
