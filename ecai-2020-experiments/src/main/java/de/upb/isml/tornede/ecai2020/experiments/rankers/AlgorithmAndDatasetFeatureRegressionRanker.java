@@ -58,9 +58,12 @@ public class AlgorithmAndDatasetFeatureRegressionRanker implements IdBasedRanker
 
 		for (int pipelineId : pipelinePerformanceStorage.getPipelineIds()) {
 			for (int trainingDatasetId : trainingDatasetIds) {
-				Instance instance = createInstanceForPipelineAndDataset(pipelineId, trainingDatasetId);
-				instance.setDataset(instances);
-				instances.add(instance);
+				double targetValue = pipelinePerformanceStorage.getPerformanceForPipelineWithIdOnDatasetWithId(pipelineId, trainingDatasetId);
+				if (targetValue > 0) {
+					Instance instance = createInstanceForPipelineAndDataset(pipelineId, trainingDatasetId);
+					instance.setDataset(instances);
+					instances.add(instance);
+				}
 			}
 		}
 		System.out.println("Generated dataset with " + instances.size() + " instances.");
