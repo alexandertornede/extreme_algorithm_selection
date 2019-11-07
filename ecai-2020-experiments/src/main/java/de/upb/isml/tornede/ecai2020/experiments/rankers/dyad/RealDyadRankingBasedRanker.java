@@ -43,6 +43,7 @@ public class RealDyadRankingBasedRanker implements IdBasedRanker {
 	@Override
 	public void train(List<Integer> trainingDatasetIds) {
 		dyadRanker = new PLNetDyadRanker(ConfigFactory.create(IPLNetDyadRankerConfiguration.class));
+		System.out.println("Training dyad ranker with config: " + dyadRanker.getConfiguration());
 
 		DyadRankingDataset dataset = trainingDatasetGenerator.generateTrainingDataset(trainingDatasetIds);
 		// System.out.println("Start training of PLNET with " + dataset.size() + " rankings.");
