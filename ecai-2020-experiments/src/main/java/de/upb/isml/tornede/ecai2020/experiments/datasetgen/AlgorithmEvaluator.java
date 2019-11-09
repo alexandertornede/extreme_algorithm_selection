@@ -19,24 +19,15 @@ public class AlgorithmEvaluator {
 		this.datasetIdToInstancesMap = datasetIdToInstancesMap;
 	}
 
-	public double evaluateAlgorithm(ComponentInstance componentInstance, int datasetId) {
-		try {
+	public double evaluateAlgorithm(ComponentInstance componentInstance, int datasetId) throws Exception {
+		Instances instances = datasetIdToInstancesMap.get(datasetId);
 
-			Instances instances = datasetIdToInstancesMap.get(datasetId);
+		WekaPipelineFactory factory = new WekaPipelineFactory();
+		Classifier classifier = factory.getComponentInstantiation(componentInstance);
 
-			WekaPipelineFactory factory = new WekaPipelineFactory();
-			Classifier classifier = factory.getComponentInstantiation(componentInstance);
-
-			Evaluation evaluation = new Evaluation(instances);
-			evaluation.crossValidateModel(classifier, instances, 5, random);
-			return evaluation.pctCorrect();
-
-		} catch (Exception ex) {
-			System.err.println("Could not evaluate " + componentInstance + " on " + datasetId + ".");
-			ex.printStackTrace();
-			return -1;
-		}
-
+		Evaluation evaluation = new Evaluation(instances);
+		evaluation.crossValidateModel(classifier, instances, 5, random);
+		return evaluation.pctCorrect();
 	}
 
 }
