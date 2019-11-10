@@ -11,8 +11,8 @@ import ai.libs.jaicore.basic.kvstore.IKVStore;
 
 public class DatasetFeatureRepresentationMap {
 
-	private static final String FEATURE_REPRESENTATION_COLUMN_NAME = "X_LANDMARKERS";
-	private static final String DATASET_ID_COLUMN_NAME = "dataset";
+	private static final String FEATURE_REPRESENTATION_COLUMN_NAME = "metafeatures";
+	private static final String DATASET_ID_COLUMN_NAME = "dataset_id";
 
 	private Map<double[], Integer> featureToDatasetIdMap;
 	private Map<Integer, double[]> datasetIdToFeaturesMap;

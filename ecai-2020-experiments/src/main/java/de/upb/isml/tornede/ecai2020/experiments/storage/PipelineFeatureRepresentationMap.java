@@ -10,8 +10,8 @@ import ai.libs.jaicore.basic.kvstore.IKVStore;
 
 public class PipelineFeatureRepresentationMap {
 
-	private static final String FEATURE_REPRESENTATION_COLUMN_NAME = "y";
-	private static final String PIPELINE_ID_COLUMN_NAME = "pipeline_id";
+	private static final String FEATURE_REPRESENTATION_COLUMN_NAME = "metafeatures";
+	private static final String PIPELINE_ID_COLUMN_NAME = "id";
 
 	private Map<double[], Integer> featureToPipelineIdMap;
 	private Map<Integer, double[]> pipelineIdToFeaturesMap;

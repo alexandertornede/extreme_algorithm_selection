@@ -13,34 +13,56 @@ import ai.libs.jaicore.basic.sets.Pair;
 public class PipelinePerformanceStorage {
 
 	private static final String PIPELINE_ID_COLUMN_NAME = "pipeline_id";
+	private static final String ALGORITHM_ID_COLUMN_NAME = "algorithm_id";
 	private static final String DATASET_ID_COLUMN_NAME = "dataset_id";
-	private static final String ACCURACY_COLUMN_NAME = "loss";
+	private static final String LOSS_COLUMN_NAME = "loss";
+	private static final String ACCURACY_COLUMN_NAME = "accuracy";
+
+	private String alternativeColumnName = ALGORITHM_ID_COLUMN_NAME;
+	private String metricColumnName = ACCURACY_COLUMN_NAME;
+
+	private boolean evaluatingOnPipelines = false;
 
 	private Map<Pair<Integer, Integer>, Double> pipelineIdDatasetIdToPerformanceMap;
 
 	public PipelinePerformanceStorage(SQLAdapter sqlAdapter, String tableName) {
+		if (tableName.startsWith("pipeline")) {
+			evaluatingOnPipelines = true;
+			alternativeColumnName = PIPELINE_ID_COLUMN_NAME;
+			metricColumnName = LOSS_COLUMN_NAME;
+		}
 		initialize(sqlAdapter, tableName);
 	}
 
 	private void initialize(SQLAdapter sqlAdapter, String tableName) {
 		pipelineIdDatasetIdToPerformanceMap = new HashMap<>();
 
-		String sqlQuery = "SELECT " + PIPELINE_ID_COLUMN_NAME + ", " + DATASET_ID_COLUMN_NAME + ", " + ACCURACY_COLUMN_NAME + " FROM " + tableName;
+		String sqlQuery = "SELECT " + alternativeColumnName + ", " + DATASET_ID_COLUMN_NAME + ", " + metricColumnName + " FROM " + tableName;
 
 		try {
 			List<IKVStore> resultSet = sqlAdapter.getResultsOfQuery(sqlQuery);
 			for (IKVStore kvStore : resultSet) {
-				int pipelineId = kvStore.getAsInt(PIPELINE_ID_COLUMN_NAME);
+				int pipelineId = kvStore.getAsInt(alternativeColumnName);
 				int datasetId = kvStore.getAsInt(DATASET_ID_COLUMN_NAME);
 
-				String zeroOneLossAsString = kvStore.getAsString(ACCURACY_COLUMN_NAME);
-				double zeroOneLoss = 1;
-				if (zeroOneLossAsString != null && !zeroOneLossAsString.equalsIgnoreCase("null")) {
-					zeroOneLoss = Double.parseDouble(zeroOneLossAsString);
-				}
+				if (evaluatingOnPipelines) {
+					String zeroOneLossAsString = kvStore.getAsString(metricColumnName);
+					double zeroOneLoss = 1;
+					if (zeroOneLossAsString != null && !zeroOneLossAsString.equalsIgnoreCase("null")) {
+						zeroOneLoss = Double.parseDouble(zeroOneLossAsString);
+					}
 
-				// do a 1- because the table stores zero-one loss, but we evaluate based on accuracy
-				pipelineIdDatasetIdToPerformanceMap.put(new Pair<>(pipelineId, datasetId), (1 - zeroOneLoss));
+					// do a 1- because the table stores zero-one loss, but we evaluate based on accuracy
+					pipelineIdDatasetIdToPerformanceMap.put(new Pair<>(pipelineId, datasetId), (1 - zeroOneLoss));
+				} else {
+					String accuracyAsString = kvStore.getAsString(metricColumnName);
+					double accuracy = 1;
+					if (accuracyAsString != null && !accuracyAsString.equalsIgnoreCase("null")) {
+						accuracy = Double.parseDouble(accuracyAsString);
+					}
+
+					pipelineIdDatasetIdToPerformanceMap.put(new Pair<>(pipelineId, datasetId), accuracy);
+				}
 			}
 
 		} catch (SQLException e) {
