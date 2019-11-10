@@ -29,11 +29,11 @@ public class AlgorithmMetafetureGenerator {
 		Component component = instance.getComponent();
 		String[] metafeatures = new String[amountOfFeatures];
 		Arrays.fill(metafeatures, "0");
-		Map<String, String> totalValuesExceptForRequiredInterfaces = new HashMap<>();
+		// Map<String, String> totalValuesExceptForRequiredInterfaces = new HashMap<>();
 
 		metafeatures[featureToIndexMap.get(component.getName())] = "1";
 
-		totalValuesExceptForRequiredInterfaces.put(component.getName(), "1");
+		// totalValuesExceptForRequiredInterfaces.put(component.getName(), "1");
 
 		for (Parameter parameter : component.getParameters()) {
 			String parameterValue = instance.getParameterValue(parameter);
@@ -41,12 +41,12 @@ public class AlgorithmMetafetureGenerator {
 				int parameterIndex = featureToIndexMap.get(getCombinedParameterIdentifier(parameter, parameterValue));
 				metafeatures[parameterIndex] = "1";
 
-				totalValuesExceptForRequiredInterfaces.put(getCombinedParameterIdentifier(parameter, parameterValue), "1");
+				// totalValuesExceptForRequiredInterfaces.put(getCombinedParameterIdentifier(parameter, parameterValue), "1");
 			} else {
 				int parameterIndex = featureToIndexMap.get(parameter.getName());
 				metafeatures[parameterIndex] = parameterValue;
 
-				totalValuesExceptForRequiredInterfaces.put(parameter.getName(), parameterValue);
+				// totalValuesExceptForRequiredInterfaces.put(parameter.getName(), parameterValue);
 			}
 		}
 		for (Entry<String, ComponentInstance> entry : instance.getSatisfactionOfRequiredInterfaces().entrySet()) {
@@ -61,7 +61,7 @@ public class AlgorithmMetafetureGenerator {
 				}
 			}
 		}
-		System.out.println(totalValuesExceptForRequiredInterfaces);
+		// System.out.println(totalValuesExceptForRequiredInterfaces);
 		return metafeatures;
 	}
 
