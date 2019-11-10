@@ -1,4 +1,4 @@
-package de.upb.isml.tornede.ecai2020.experiments.datasetgen;
+package de.upb.isml.tornede.ecai2020.experiments.datasetgen.algorithm;
 
 import java.util.Map;
 import java.util.Random;

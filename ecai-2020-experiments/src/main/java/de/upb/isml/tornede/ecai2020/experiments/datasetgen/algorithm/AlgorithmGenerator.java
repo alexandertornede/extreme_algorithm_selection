@@ -1,4 +1,4 @@
-package de.upb.isml.tornede.ecai2020.experiments.datasetgen;
+package de.upb.isml.tornede.ecai2020.experiments.datasetgen.algorithm;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,19 +46,6 @@ public class AlgorithmGenerator {
 			}
 		}
 		return generatedAlgorithms.stream().distinct().collect(Collectors.toList());
-	}
-
-	public static void main(String[] args) throws Exception {
-		// long randomSeed = 1234;
-		// AlgorithmGenerator generator = new AlgorithmGenerator(randomSeed);
-		// List<ComponentInstance> componentInstances = generator.generateRandomAlgorithmConfigurations(100);
-		// List<Integer> datasetIds = OpenMLUtil.getDatasetIds();
-		// AlgorithmEvaluator evaluator = new AlgorithmEvaluator(randomSeed, OpenMLUtil.getOpenMLDatasetIdsToInstancesMap());
-		// for (ComponentInstance instance : componentInstances) {
-		// System.out.println("Evaluating: " + instance.getComponent().getName() + ": " + instance.getParameterValues());
-		// System.out.println(evaluator.evaluateAlgorithm(instance, datasetIds.get(0)));
-		// }
-
 	}
 
 	public ComponentInstance getRandomComponentInstance(Component component) {
@@ -114,4 +101,9 @@ public class AlgorithmGenerator {
 		}
 		return instance;
 	}
+
+	public Collection<Component> getBaseComponents() {
+		return baseComponents;
+	}
+
 }
