@@ -1,9 +1,13 @@
 package de.upb.isml.tornede.ecai2020.experiments.rankers.regression;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import ai.libs.hasco.serialization.ComponentLoader;
+import de.upb.isml.tornede.ecai2020.experiments.datasetgen.algorithm.AlgorithmMetafetureGenerator;
 import de.upb.isml.tornede.ecai2020.experiments.storage.DatasetFeatureRepresentationMap;
 import de.upb.isml.tornede.ecai2020.experiments.storage.PipelineFeatureRepresentationMap;
 import de.upb.isml.tornede.ecai2020.experiments.storage.PipelinePerformanceStorage;
@@ -13,11 +17,14 @@ import weka.core.Instance;
 
 public abstract class AbstractRegressionDatasetGenerator implements RegressionDatasetGenerator {
 
+	protected boolean oldDataset;
 	protected PipelineFeatureRepresentationMap pipelineFeatureRepresentationMap;
 	protected DatasetFeatureRepresentationMap datasetFeatureRepresentationMap;
 	protected PipelinePerformanceStorage pipelinePerformanceStorage;
 
-	public AbstractRegressionDatasetGenerator(PipelineFeatureRepresentationMap pipelineFeatureRepresentationMap, DatasetFeatureRepresentationMap datasetFeatureRepresentationMap, PipelinePerformanceStorage pipelinePerformanceStorage) {
+	public AbstractRegressionDatasetGenerator(boolean oldDataset, PipelineFeatureRepresentationMap pipelineFeatureRepresentationMap, DatasetFeatureRepresentationMap datasetFeatureRepresentationMap,
+			PipelinePerformanceStorage pipelinePerformanceStorage) {
+		this.oldDataset = oldDataset;
 		this.pipelineFeatureRepresentationMap = pipelineFeatureRepresentationMap;
 		this.datasetFeatureRepresentationMap = datasetFeatureRepresentationMap;
 		this.pipelinePerformanceStorage = pipelinePerformanceStorage;
@@ -52,7 +59,7 @@ public abstract class AbstractRegressionDatasetGenerator implements RegressionDa
 		return attributes;
 	}
 
-	protected List<Attribute> createPipelineAttributeList() {
+	private List<Attribute> createPipelineAttributeList() {
 		List<Attribute> attributes = new ArrayList<>();
 		int counter;
 		// 0-24: 0/1
@@ -131,5 +138,18 @@ public abstract class AbstractRegressionDatasetGenerator implements RegressionDa
 			counter++;
 		}
 		return attributes;
+	}
+
+	protected List<Attribute> createAlgorithmAttributeList() {
+		if (oldDataset) {
+			return createPipelineAttributeList();
+		}
+		try {
+			ComponentLoader componenLoader = new ComponentLoader(new File("components/weka-singlelabel-base.json"));
+			AlgorithmMetafetureGenerator featureGenerator = new AlgorithmMetafetureGenerator(componenLoader.getComponents());
+			return featureGenerator.getWekaAttributeList();
+		} catch (IOException e) {
+			throw new RuntimeException("Cannot create algorithm attribute list!", e);
+		}
 	}
 }

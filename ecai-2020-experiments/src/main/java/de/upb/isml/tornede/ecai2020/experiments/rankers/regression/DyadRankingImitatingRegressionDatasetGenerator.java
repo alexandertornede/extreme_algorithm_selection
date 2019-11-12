@@ -22,9 +22,9 @@ public class DyadRankingImitatingRegressionDatasetGenerator extends AbstractRegr
 
 	private ArrayList<Attribute> attributeInfo;
 
-	public DyadRankingImitatingRegressionDatasetGenerator(PipelineFeatureRepresentationMap pipelineFeatureRepresentationMap, DatasetFeatureRepresentationMap datasetFeatureRepresentationMap,
+	public DyadRankingImitatingRegressionDatasetGenerator(boolean oldDataset, PipelineFeatureRepresentationMap pipelineFeatureRepresentationMap, DatasetFeatureRepresentationMap datasetFeatureRepresentationMap,
 			PipelinePerformanceStorage pipelinePerformanceStorage, int lengthOfRankings, int numberOfRankingsPerTrainingDataset) {
-		super(pipelineFeatureRepresentationMap, datasetFeatureRepresentationMap, pipelinePerformanceStorage);
+		super(oldDataset, pipelineFeatureRepresentationMap, datasetFeatureRepresentationMap, pipelinePerformanceStorage);
 		this.lengthOfRanking = lengthOfRankings;
 		this.numberOfRankingsPerTrainingDataset = numberOfRankingsPerTrainingDataset;
 	}
@@ -34,7 +34,7 @@ public class DyadRankingImitatingRegressionDatasetGenerator extends AbstractRegr
 		List<Integer> pipelineIds = pipelinePerformanceStorage.getPipelineIds();
 
 		List<Attribute> datasetFeatureAttributes = createDatasetAttributeList();
-		List<Attribute> pipelineFeatureAttributes = createPipelineAttributeList();
+		List<Attribute> pipelineFeatureAttributes = createAlgorithmAttributeList();
 		Attribute targetAttribute = new Attribute("performance");
 		attributeInfo = new ArrayList<>();
 		attributeInfo.addAll(datasetFeatureAttributes);

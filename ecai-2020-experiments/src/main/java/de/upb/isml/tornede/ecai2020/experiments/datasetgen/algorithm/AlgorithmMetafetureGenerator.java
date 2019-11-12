@@ -12,6 +12,7 @@ import ai.libs.hasco.model.CategoricalParameterDomain;
 import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.model.Parameter;
+import weka.core.Attribute;
 
 public class AlgorithmMetafetureGenerator {
 
@@ -29,24 +30,18 @@ public class AlgorithmMetafetureGenerator {
 		Component component = instance.getComponent();
 		String[] metafeatures = new String[amountOfFeatures];
 		Arrays.fill(metafeatures, "0");
-		// Map<String, String> totalValuesExceptForRequiredInterfaces = new HashMap<>();
 
 		metafeatures[featureToIndexMap.get(component.getName())] = "1";
-
-		// totalValuesExceptForRequiredInterfaces.put(component.getName(), "1");
 
 		for (Parameter parameter : component.getParameters()) {
 			String parameterValue = instance.getParameterValue(parameter);
 			if (parameter.isCategorical()) {
-				int parameterIndex = featureToIndexMap.get(getCombinedParameterIdentifier(parameter, parameterValue));
+				int parameterIndex = featureToIndexMap.get(getCategoricalParameterIdentifier(component, parameter, parameterValue));
 				metafeatures[parameterIndex] = "1";
-
-				// totalValuesExceptForRequiredInterfaces.put(getCombinedParameterIdentifier(parameter, parameterValue), "1");
 			} else {
-				int parameterIndex = featureToIndexMap.get(parameter.getName());
+				int parameterIndex = featureToIndexMap.get(getNumericalParameterIdentifier(component, parameter));
 				metafeatures[parameterIndex] = parameterValue;
 
-				// totalValuesExceptForRequiredInterfaces.put(parameter.getName(), parameterValue);
 			}
 		}
 		for (Entry<String, ComponentInstance> entry : instance.getSatisfactionOfRequiredInterfaces().entrySet()) {
@@ -61,8 +56,11 @@ public class AlgorithmMetafetureGenerator {
 				}
 			}
 		}
-		// System.out.println(totalValuesExceptForRequiredInterfaces);
 		return metafeatures;
+	}
+
+	private String getNumericalParameterIdentifier(Component component, Parameter parameter) {
+		return component.getName() + "." + parameter.getName();
 	}
 
 	private void createFeatureToIndexMap() {
@@ -74,18 +72,36 @@ public class AlgorithmMetafetureGenerator {
 				if (parameter.isCategorical()) {
 					CategoricalParameterDomain domain = (CategoricalParameterDomain) parameter.getDefaultDomain();
 					for (String value : domain.getValues()) {
-						featureToIndexMap.put(getCombinedParameterIdentifier(parameter, value), amountOfFeatures);
+						featureToIndexMap.put(getCategoricalParameterIdentifier(component, parameter, value), amountOfFeatures);
 						amountOfFeatures++;
 					}
 				} else {
-					featureToIndexMap.put(parameter.getName(), amountOfFeatures);
+					featureToIndexMap.put(getNumericalParameterIdentifier(component, parameter), amountOfFeatures);
 					amountOfFeatures++;
 				}
 			}
 		}
 	}
 
-	private String getCombinedParameterIdentifier(Parameter parameter, String parameterValue) {
-		return parameter.getName() + "=" + parameterValue;
+	public ArrayList<Attribute> getWekaAttributeList() {
+		ArrayList<Attribute> attributes = new ArrayList<>();
+		for (Component component : components) {
+			attributes.add(new Attribute(component.getName(), Arrays.asList("0", "1")));
+			for (Parameter parameter : component.getParameters()) {
+				if (parameter.isCategorical()) {
+					CategoricalParameterDomain domain = (CategoricalParameterDomain) parameter.getDefaultDomain();
+					for (String value : domain.getValues()) {
+						attributes.add(new Attribute(getCategoricalParameterIdentifier(component, parameter, value), Arrays.asList("0", "1")));
+					}
+				} else {
+					attributes.add(new Attribute(getNumericalParameterIdentifier(component, parameter)));
+				}
+			}
+		}
+		return attributes;
+	}
+
+	private String getCategoricalParameterIdentifier(Component component, Parameter parameter, String parameterValue) {
+		return component.getName() + "." + parameter.getName() + "=" + parameterValue;
 	}
 }

@@ -27,7 +27,7 @@ public class AlgorithmEvaluator {
 
 		Evaluation evaluation = new Evaluation(instances);
 		evaluation.crossValidateModel(classifier, instances, 5, random);
-		return evaluation.pctCorrect();
+		return evaluation.pctCorrect() / 100.0;
 	}
 
 }

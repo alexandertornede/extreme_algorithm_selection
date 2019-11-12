@@ -21,18 +21,18 @@ public class RandomRegressionDatasetGenerator extends AbstractRegressionDatasetG
 
 	private int datasetSize;
 
-	public RandomRegressionDatasetGenerator(PipelineFeatureRepresentationMap pipelineFeatureRepresentationMap, DatasetFeatureRepresentationMap datasetFeatureRepresentationMap, PipelinePerformanceStorage pipelinePerformanceStorage,
-			int datasetSize) {
-		super(pipelineFeatureRepresentationMap, datasetFeatureRepresentationMap, pipelinePerformanceStorage);
+	public RandomRegressionDatasetGenerator(boolean oldDataset, PipelineFeatureRepresentationMap pipelineFeatureRepresentationMap, DatasetFeatureRepresentationMap datasetFeatureRepresentationMap,
+			PipelinePerformanceStorage pipelinePerformanceStorage, int datasetSize) {
+		super(oldDataset, pipelineFeatureRepresentationMap, datasetFeatureRepresentationMap, pipelinePerformanceStorage);
 		this.datasetSize = datasetSize;
 	}
 
 	@Override
 	public Instances generateTrainingDataset(List<Integer> trainingDatasetIds) {
 		List<Attribute> datasetFeatureAttributes = createDatasetAttributeList();
-		List<Attribute> pipelineFeatureAttributes = createPipelineAttributeList();
+		List<Attribute> pipelineFeatureAttributes = createAlgorithmAttributeList();
 		Attribute targetAttribute = new Attribute("performance");
-		ArrayList<Attribute> attributeInfo = new ArrayList<>();
+		attributeInfo = new ArrayList<>();
 		attributeInfo.addAll(datasetFeatureAttributes);
 		attributeInfo.addAll(pipelineFeatureAttributes);
 		attributeInfo.add(targetAttribute);
