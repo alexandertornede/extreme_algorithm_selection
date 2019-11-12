@@ -104,8 +104,6 @@ public class ExperimentRunnerEcai {
 		RandomRanker randomRanker = new RandomRanker();
 		OracleRanker oracleRanker = new OracleRanker(pipelinePerformanceStorage);
 		rankers.addAll(Arrays.asList(algorithmAndDatasetRegressionRankerFull, averageRankBasedRanker, onennRanker, twonnRanker, randomRanker, averagePerformanceRanker));
-		rankers.clear();
-		rankers.add(algorithmAndDatasetRegressionRankerFull);
 
 		List<Metric> metrics = Arrays.asList(new NormalizedDiscountedCumulativeGain(3), new NormalizedDiscountedCumulativeGain(5), new NormalizedDiscountedCumulativeGain(10), new KendallsTauBasedOnApache(),
 				new KendallsTauBasedOnApacheAndRanks(), new PerformanceDifferenceOfAverageOnTopK(3), new PerformanceDifferenceOfBestOnTopK(3), new PerformanceDifferenceOfAverageOnTopK(5), new PerformanceDifferenceOfBestOnTopK(5));
