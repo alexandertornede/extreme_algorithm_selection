@@ -14,14 +14,14 @@ import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.model.Parameter;
 import weka.core.Attribute;
 
-public class AlgorithmMetafetureGenerator {
+public class AlgorithmMetafeatureGenerator {
 
 	private List<Component> components;
 
 	private Map<String, Integer> featureToIndexMap;
 	private int amountOfFeatures;
 
-	public AlgorithmMetafetureGenerator(Collection<Component> components) {
+	public AlgorithmMetafeatureGenerator(Collection<Component> components) {
 		this.components = new ArrayList<>(components);
 		createFeatureToIndexMap();
 	}
