@@ -1,46 +1,35 @@
 package de.upb.isml.tornede.ecai2020.experiments;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.ml.dyadranking.Dyad;
-import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingInstance;
-import ai.libs.jaicore.ml.dyadranking.loss.KendallsTauDyadRankingLoss;
-import de.upb.isml.tornede.ecai2020.experiments.loss.KendallsTauBasedOnApache;
-import de.upb.isml.tornede.ecai2020.experiments.loss.KendallsTauCorrelation;
 
 public class PipelineFeatureRepresentationMapTest {
 
-	public static void main(String[] args) throws SQLException {
+	public static void main(String[] args) throws SQLException, IOException {
 
-		KendallsTauBasedOnApache kA = new KendallsTauBasedOnApache();
+		String fileContentNoctua = "#!/bin/bash\n" + //
+				"#SBATCH -N 1\n" + //
+				"#SBATCH -J ecai2020_ranking\n" + //
+				"#SBATCH -A hpc-prf-isys\n" + //
+				"#SBATCH -p batch\n" + //
+				"#SBATCH -t 12:00:00\n" + //
+				"#SBATCH --mail-type all\n" + //
+				"#SBATCH --mail-user ahetzer@mail.upb.de\n" + //
+				"\n" + "#run your application here\n" + //
+				"export OMP_NUM_THREADS=2\n" + //
+				"java -Xmx190G -XX:ParallelGCThreads=2 -jar ecai-2020-experiments-all.jar $P$";
 
-		KendallsTauCorrelation kC = new KendallsTauCorrelation();
-
-		KendallsTauDyadRankingLoss rL = new KendallsTauDyadRankingLoss();
-
-		while (true) {
-			List<Integer> list = IntStream.range(0, 10).boxed().collect(Collectors.toList());
-
-			List<Integer> list2 = new ArrayList<>(list);
-			Collections.shuffle(list2);
-
-			List<Pair<Integer, Double>> listPairs = list.stream().map(i -> new Pair<>(i, 0d)).collect(Collectors.toList());
-			List<Pair<Integer, Double>> list2Pairs = list2.stream().map(i -> new Pair<>(i, 0d)).collect(Collectors.toList());
-
-			DyadRankingInstance instance1 = new DyadRankingInstance(list.stream().map(i -> new Dyad(new DenseDoubleVector(1), new DenseDoubleVector(new double[] { i }))).collect(Collectors.toList()));
-			DyadRankingInstance instance2 = new DyadRankingInstance(list2.stream().map(i -> new Dyad(new DenseDoubleVector(1), new DenseDoubleVector(new double[] { i }))).collect(Collectors.toList()));
-
-			System.out.println("apache: " + kA.evaluate(listPairs, list2Pairs) + " - own: " + kC.evaluate(listPairs, list2Pairs) + " -pg: " + rL.loss(instance1, instance2));
-
+		for (int i = 0; i < 10; i++) {
+			String adaptedFileContent = fileContentNoctua.replace("$P$", "" + i);
+			Files.writeString(Paths.get("conf/run-experiment_" + i + ".sh"), adaptedFileContent);
+			System.out.println("ccsalloc run-experiment_" + i + ".sh");
 		}
 
+		for (int i = 0; i < 10; i++) {
+			System.out.println("sbatch run-experiment_" + i + ".sh");
+		}
 	}
 
 }

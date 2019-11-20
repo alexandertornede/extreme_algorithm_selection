@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import ai.libs.hasco.serialization.ComponentLoader;
-import de.upb.isml.tornede.ecai2020.experiments.datasetgen.algorithm.AlgorithmMetafetureGenerator;
+import de.upb.isml.tornede.ecai2020.experiments.datasetgen.algorithm.AlgorithmMetafeatureGenerator;
 import de.upb.isml.tornede.ecai2020.experiments.storage.DatasetFeatureRepresentationMap;
 import de.upb.isml.tornede.ecai2020.experiments.storage.PipelineFeatureRepresentationMap;
 import de.upb.isml.tornede.ecai2020.experiments.storage.PipelinePerformanceStorage;
@@ -146,7 +146,7 @@ public abstract class AbstractRegressionDatasetGenerator implements RegressionDa
 		}
 		try {
 			ComponentLoader componenLoader = new ComponentLoader(new File("components/weka-singlelabel-base.json"));
-			AlgorithmMetafetureGenerator featureGenerator = new AlgorithmMetafetureGenerator(componenLoader.getComponents());
+			AlgorithmMetafeatureGenerator featureGenerator = new AlgorithmMetafeatureGenerator(componenLoader.getComponents());
 			return featureGenerator.getWekaAttributeList();
 		} catch (IOException e) {
 			throw new RuntimeException("Cannot create algorithm attribute list!", e);

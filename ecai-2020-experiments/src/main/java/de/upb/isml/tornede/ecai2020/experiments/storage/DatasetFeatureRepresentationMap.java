@@ -54,4 +54,8 @@ public class DatasetFeatureRepresentationMap {
 	public List<Integer> getDatasetIds() {
 		return datasetIdToFeaturesMap.keySet().stream().collect(Collectors.toList());
 	}
+
+	public int getNumberOfFeatures() {
+		return datasetIdToFeaturesMap.values().stream().findAny().get().length;
+	}
 }
