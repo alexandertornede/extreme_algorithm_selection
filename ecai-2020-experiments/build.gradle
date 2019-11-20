@@ -26,13 +26,17 @@ sourceCompatibility = 8
 targetCompatibility = 8
 
 dependencies {
-   implementation ('ai.libs:mlplan:0.1.6')
+   implementation ('ai.libs:mlplan:0.1.6'){
+   		exclude group: 'mysql', module: 'mysql-connector-java'
+   }
+   compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.25'
 }
 
 jar {
     manifest {
         attributes(
-            'Main-Class': "de.upb.isml.tornede.ecai2020.experiments.evaluator.ExperimentRunner"
+            'Main-Class': "de.upb.isml.tornede.ecai2020.experiments.evaluator.ExperimentRunnerEcai"
+            //'Main-Class': "de.upb.isml.tornede.ecai2020.experiments.datasetgen.feature.DatasetMetafeatureGeneratorRunner"
         )
     }
 }
