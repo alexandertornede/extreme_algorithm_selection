@@ -72,7 +72,7 @@ public class PipelinePerformanceStorage {
 
 	public double getPerformanceForPipelineWithIdOnDatasetWithId(int pipelineId, int datasetId) {
 		Pair<Integer, Integer> key = new Pair<>(pipelineId, datasetId);
-		if (!pipelineIdDatasetIdToPerformanceMap.containsKey(key)) {
+		if (!pipelineIdDatasetIdToPerformanceMap.containsKey(key) || pipelineIdDatasetIdToPerformanceMap.get(key) < 0) {
 			return 0;
 		}
 		return pipelineIdDatasetIdToPerformanceMap.get(key);
