@@ -20,6 +20,7 @@ import de.upb.isml.tornede.ecai2020.experiments.loss.Metric;
 import de.upb.isml.tornede.ecai2020.experiments.loss.NormalizedDiscountedCumulativeGain;
 import de.upb.isml.tornede.ecai2020.experiments.loss.PerformanceDifferenceOfAverageOnTopK;
 import de.upb.isml.tornede.ecai2020.experiments.loss.PerformanceDifferenceOfBestOnTopK;
+import de.upb.isml.tornede.ecai2020.experiments.rankers.AlorsBasedRanker;
 import de.upb.isml.tornede.ecai2020.experiments.rankers.AveragePerformanceRanker;
 import de.upb.isml.tornede.ecai2020.experiments.rankers.AverageRankBasedRanker;
 import de.upb.isml.tornede.ecai2020.experiments.rankers.IdBasedRanker;
@@ -39,7 +40,6 @@ import weka.classifiers.trees.RandomForest;
 public class ExperimentRunnerEcai {
 
 	public static void main(String[] args) throws Exception {
-		// int[] datasetIds = new int[] { 44, 1504, 312, 1467, 50, 31, 1046, 1493, 151, 334, 1491, 1471, 1067, 1038, 1480, 1494, 1050, 1464, 1063, 333, 1510, 37, 1489, 335, 1462, 1487, 1049, 1068, 3 }; // old dataset
 
 		ExperimentRunnerEcaiConfig config = ConfigFactory.create(ExperimentRunnerEcaiConfig.class);
 		System.out.println(config);
@@ -49,10 +49,6 @@ public class ExperimentRunnerEcai {
 		String dbUser = config.getDBUsername();
 		String dbPassword = config.getDBPassword();
 		String dbHost = config.getDBHost();
-
-		// int[] datasetIds = new int[] { 3, 40966, 6, 11, 12, 14, 15, 40975, 16, 18, 40978, 40979, 40982, 22, 23, 40983, 151, 40984, 1049, 1050, 28, 29, 1053, 31, 32, 40994, 37, 38, 4134, 1063, 1067, 1068, 44, 300, 46, 50, 307, 40499,
-		// 1461,
-		// 1462, 54, 182, 4534, 1590, 1464, 4538, 188, 6332, 1468, 1475, 41027, 1478, 1480, 458, 1485, 1486, 1487, 1489, 23381, 469, 1494, 1497, 40668, 1501, 23517, 40670, 1510, 40701 }; // new dataset
 
 		List<Integer> datasetIds = config.getDatasetIds();
 		int fold = Integer.parseInt(args[0]);
@@ -69,25 +65,19 @@ public class ExperimentRunnerEcai {
 
 		SQLAdapter sqlAdapter = new SQLAdapter(dbHost, dbUser, dbPassword, databaseName, true);
 
-		PipelineFeatureRepresentationMap pipelineFeatureMap = new PipelineFeatureRepresentationMap(sqlAdapter, "algorithm_metafeatures"); // pipeline_feature_representations
-		DatasetFeatureRepresentationMap datasetFeatureMap = new DatasetFeatureRepresentationMap(sqlAdapter, "dataset_metafeatures_new"); // dataset_metafeatures
-		PipelinePerformanceStorage pipelinePerformanceStorage = new PipelinePerformanceStorage(sqlAdapter, "algorithm_evaluations_with_timeouts"); // pipeline_evaluations
+		PipelineFeatureRepresentationMap pipelineFeatureMap = new PipelineFeatureRepresentationMap(sqlAdapter, "algorithm_metafeatures");
+		DatasetFeatureRepresentationMap datasetFeatureMap = new DatasetFeatureRepresentationMap(sqlAdapter, "dataset_metafeatures_new");
+		PipelinePerformanceStorage pipelinePerformanceStorage = new PipelinePerformanceStorage(sqlAdapter, "algorithm_evaluations_with_timeouts");
 
 		List<IdBasedRanker> rankers = new ArrayList<>();
 
-		// add own ranker variants
-		int[] numberOfRankingsPerTrainingDataset = new int[] { 25, 50, 125, 250, 500, 1000 };
+		int[] numberOfRankingsPerTrainingDataset = new int[] { 25, 50, 125 };
 		int[] lengthOfRankingsForDyadRanker = new int[] { 2, 3 };
 		int numberOfRankingsToTest = 100;
 		int numberOfPipelinesPerTestRanking = 10;
 
 		for (int l : lengthOfRankingsForDyadRanker) {
 			for (int n : numberOfRankingsPerTrainingDataset) {
-				// DyadRankingImitatingRegressionDatasetGenerator regressionDatasetGenerator = new DyadRankingImitatingRegressionDatasetGenerator(pipelineFeatureMap, datasetFeatureMap, pipelinePerformanceStorage, l, n);
-				// AlgorithmAndDatasetFeatureRegressionRanker algorithmAndDatasetRegressionRanker = new AlgorithmAndDatasetFeatureRegressionRanker(pipelineFeatureMap, datasetFeatureMap, pipelinePerformanceStorage, new RandomForest(),
-				// regressionDatasetGenerator);
-				// rankers.add(algorithmAndDatasetRegressionRanker);
-
 				DyadRankingTrainingDatasetGenerator datasetGenerator = new RandomDyadRankingDatasetGenerator(pipelineFeatureMap, datasetFeatureMap, pipelinePerformanceStorage, l, n);
 				RealDyadRankingBasedRanker randomlyTrainedDyadRanker = new RealDyadRankingBasedRanker(pipelineFeatureMap, datasetFeatureMap, datasetGenerator);
 				rankers.add(randomlyTrainedDyadRanker);
@@ -103,10 +93,15 @@ public class ExperimentRunnerEcai {
 		AverageRankBasedRanker averageRankBasedRanker = new AverageRankBasedRanker(pipelinePerformanceStorage);
 		RandomRanker randomRanker = new RandomRanker();
 		OracleRanker oracleRanker = new OracleRanker(pipelinePerformanceStorage);
+
 		rankers.addAll(Arrays.asList(algorithmAndDatasetRegressionRankerFull, averageRankBasedRanker, onennRanker, twonnRanker, randomRanker, averagePerformanceRanker));
 
+		rankers.add(new AlorsBasedRanker(datasetFeatureMap, pipelinePerformanceStorage, "REGRESSION"));
+		rankers.add(new AlorsBasedRanker(datasetFeatureMap, pipelinePerformanceStorage, "NDCG"));
+
 		List<Metric> metrics = Arrays.asList(new NormalizedDiscountedCumulativeGain(3), new NormalizedDiscountedCumulativeGain(5), new NormalizedDiscountedCumulativeGain(10), new KendallsTauBasedOnApache(),
-				new KendallsTauBasedOnApacheAndRanks(), new PerformanceDifferenceOfAverageOnTopK(3), new PerformanceDifferenceOfBestOnTopK(3), new PerformanceDifferenceOfAverageOnTopK(5), new PerformanceDifferenceOfBestOnTopK(5));
+				new KendallsTauBasedOnApacheAndRanks(), new PerformanceDifferenceOfBestOnTopK(1), new PerformanceDifferenceOfAverageOnTopK(3), new PerformanceDifferenceOfBestOnTopK(3), new PerformanceDifferenceOfAverageOnTopK(5),
+				new PerformanceDifferenceOfBestOnTopK(5));
 		System.out.println(getCurrentTimestep() + " :: Running " + (10 * rankers.size()) + " experiments in total.");
 
 		ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -134,14 +129,6 @@ public class ExperimentRunnerEcai {
 
 		return new Pair<>(trainingDatasets, testDatasets);
 	}
-
-	// private static PLNetDyadRanker getDyadRankerForNumberOfPairwiseSamples(int numberOfPairwiseSamplesPerDataset, int datasetTestSplitId) throws IOException {
-	// PLNetDyadRanker dyadRanker = new PLNetDyadRanker();
-	// String filePath = pathToStoredRankingModels + "/ranker_" + numberOfPairwiseSamplesPerDataset + "_" + datasetTestSplitId + ".zip";
-	// // System.out.println("Loading: " + filePath);
-	// dyadRanker.loadModelFromFile(filePath);
-	// return dyadRanker;
-	// }
 
 	private static String getCurrentTimestep() {
 		SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");// dd/MM/yyyy
