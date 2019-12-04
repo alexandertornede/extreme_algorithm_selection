@@ -28,7 +28,7 @@ As algorithms we used 18 classifiers from the Java machine learning library [WEK
 
 An overview of these classifiers and their types of hyperparameters is given in the table below. The last row of the table sums up the items of the respective column, providing insights into the dimensionality of the space of potential candidate algorithms. From this space, we randomly sampled up to 100 distinct instantiations of each classifier, ensuring the instances being not too similar, yielding a set of 1270 candidate algorithms.
 
-![](img/classifier_table.png | width=350)
+![](img/classifier_table.png)
 
 Candidate algorithms are represented in terms of features by using their hyperparameters, or more precisely the values of their hyperparameters. Assume that an algorithm family is defined by the different instantiations of an algorithm featuring several hyperparameters. For example, we consider support vector machines (SVM) as an algorithm family and different configurations of an SVM as members of this family. Then, given a set of algorithm families, e.g. `{SVM, random forests (RF), logistic regression (LOR)}`, we compute the union over the set of parameters of the algorithm families and create a vector with one entry per numerical parameter and as many entries per categorical parameter as needed to allow for a one-hot-encoding. Furthermore, the feature representation has a binary feature per algorithm family, indicating whether a given candidate algorithm comes from that family or not. Then, when given any candidate algorithm from a known algorithm family, we create the associated feature representation by setting each element in the vector to the respective parameter value while initializing the irrelevant ones with 0.
 
