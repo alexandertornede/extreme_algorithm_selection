@@ -19,7 +19,7 @@ setting and improve over the state of the art in various metrics.
 We created a benchmark dataset with over 1200 machine learning classification algorithms represented by feature information and evaluated them on almost 68 classification datasets from the [OpenML CC-18 benchmark](https://docs.openml.org/benchmark/#openml-cc18). This dataset contains both feature information for algorithms and datasets. Furthermore, the accuracy of the classification algorithms on the datasets is reported. 
 
 ### Datasets
-We used all datasets contained in the OpenML CC-18 benchmark, except for the ones with the IDs 40923,40927,40996,554. The first two were excluded for technical reasons as they yielded errors within our code due to formatting errors. The latter two were excluded since none of the algorithms were sucessfully evaluated within a timelimit of 5 minutes.
+We used all datasets contained in the OpenML CC-18 benchmark, except for the ones with the IDs 40923,40927,40996,554. The first two were excluded for technical reasons as they yielded errors within our code due to formatting errors. The latter two were excluded since none of the algorithms were successfully evaluated within a time limit of 5 minutes.
 
 Datasets are represented in terms of features by all 45 OpenML landmarkers, for which different configurations of the following learning algorithms are evaluated based on the error rate, area under the (ROC) curve, and Kappa coefficient: Naive Bayes, One-Nearest Neighbour, Decision Stump, Random Tree, REPTree and J48.
 
@@ -35,7 +35,7 @@ Candidate algorithms are represented in terms of features by using their hyperpa
 As an example, consider again the set of algorithm families `{SVM, RF, LOR}` and assume for simplicity that each of these families has only a single numerical parameter. Then, given an SVM instantiation a where the associated parameter is set to `0.4` a feature representation according to our technique could be `(1,0.4,0,0,0,0)`. The first two elements of the vector correspond to the SVM family of which the first element, i.e. the 1, indicates that a is an SVM instantiation and the second element corresponds to its parameter value 0.4.
 
 ### Performance Values
-We evaluted each of the candidate algorithms described above on all of the datasets given above using a 5-fold cross validation. The measure we used is classification accuracy. Each evaluation was constrained by a timeout of 5 minutes. Evaluations which did not finish in time are represented by a negative value in the dataset.
+We evaluated each of the candidate algorithms described above on all of the datasets given above using a 5-fold cross validation. The measure we used is classification accuracy. Each evaluation was constrained by a timeout of 5 minutes. Evaluations which did not finish in time are represented by a negative value in the dataset.
 
 
 ### Download and Structure
@@ -75,7 +75,7 @@ You have to adapt all entries starting with `db.` according to your database ser
 * `db.table`: the name of the table, where results should be stored. This is created automatically by the code if it does not exist yet and should NOT be created manually.
 * `db.ssl`: whether ssl should be used or not
 
-Furthermore, the neural network used by the dyad ranking approach requires a configuration file with the following content entiteled `plnet.properties` in the directory `conf/plNet`:
+Furthermore, the neural network used by the dyad ranking approach requires a configuration file with the following content entitled `plnet.properties` in the directory `conf/plNet`:
 ```
 plnet.learningrate = 0.01
 plnet.hidden.nodes = 50,50,30,20,20
@@ -89,10 +89,11 @@ plnet.early.stopping.train.ratio = 0.8
 plnet.early.stopping.retrain = true
 ```
 
+### Obtaining Evaluation Results
 After this file has been created, you can execute the main method of the class `de.upb.isml.tornede.ecai2020.experiments.evaluator.ExperimentRunnerEcai` in order to run all experiments which we performed for the paper. The results will be stored in the table given in the configuration file and has the following columns 
 
-* `dataset_split`: The id of the split wrt to the 10-fold crossvalidation on the datasets
-* `approach`: The name of the approach which is evaluted.
+* `dataset_split`: The id of the split wrt. to the 10-fold cross-validation on the datasets
+* `approach`: The name of the approach which is evaluated.
 * `test_dataset_id`: The id of the test dataset for which the evaluation is performed.
 * `ranking_to_test`: The id of the ranking to test. Recall that we sample 100 rankings of length 10 to compare against.
 * `metric`: The name of the metric for which the result is reported.
@@ -100,9 +101,8 @@ After this file has been created, you can execute the main method of the class `
 
 In order to obtain the results reported in the paper, you have to group by approach and metric and aggregate the metric results. This can be easily done via an SQL query.
 
-For reproducing the results wrt. significance, you have to .... <span style="color:red">TODO@Marcel</span>.
-
-
+### Generating The Paper's Performance Table
+For generating the exact performance table found in the paper, including the results of the performed significance tests, you have to run the main method of the `ai.libs.jaicore.basic.kvstore.ResultsTableGenerator`, which will output the latex code of the table on the console. Note that this generator does not query the database, but loads its values from a key-value store file in the data folder of the project storing an aggregation of the performance data obtained when running the approach.
 
 ## Configuration Details
 The following configuration details did not find a spot within the paper: 
