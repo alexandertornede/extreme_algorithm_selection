@@ -28,7 +28,7 @@ As algorithms we used 18 classifiers from the Java machine learning library [WEK
 
 An overview of these classifiers and their types of hyperparameters is given in the table below. The last row of the table sums up the items of the respective column, providing insights into the dimensionality of the space of potential candidate algorithms. From this space, we randomly sampled up to 100 distinct instantiations of each classifier, ensuring the instances being not too similar, yielding a set of 1270 candidate algorithms.
 
-![](img/classifier_table.png)
+![](img/classifier_table.png | width=350)
 
 Candidate algorithms are represented in terms of features by using their hyperparameters, or more precisely the values of their hyperparameters. Assume that an algorithm family is defined by the different instantiations of an algorithm featuring several hyperparameters. For example, we consider support vector machines (SVM) as an algorithm family and different configurations of an SVM as members of this family. Then, given a set of algorithm families, e.g. `{SVM, random forests (RF), logistic regression (LOR)}`, we compute the union over the set of parameters of the algorithm families and create a vector with one entry per numerical parameter and as many entries per categorical parameter as needed to allow for a one-hot-encoding. Furthermore, the feature representation has a binary feature per algorithm family, indicating whether a given candidate algorithm comes from that family or not. Then, when given any candidate algorithm from a known algorithm family, we create the associated feature representation by setting each element in the vector to the respective parameter value while initializing the irrelevant ones with 0.
 
@@ -39,7 +39,7 @@ We evaluted each of the candidate algorithms described above on all of the datas
 
 
 ### Download and Structure
-The benchmark dataset can be downloaded from this Github repository: (benchmark_dataset)[benchmark_dataset.zip]. Be aware that it expands to over 300 MB during decompression. The structure of the files is as follows. 
+The benchmark dataset can be downloaded from this Github repository: [benchmark_dataset](benchmark_dataset.zip). Be aware that it expands to over 300 MB during decompression. The structure of the files is as follows. 
 
 The zip file contains three CSV files:
 * dataset_metafeature_new.csv: Each line corresponds to a dataset from the OpenML benchmark and its associated metafeature representation. The first element in the line is the OpenML ID of the dataset whereas the second element is the feature representation described above.
