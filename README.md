@@ -46,7 +46,64 @@ The zip file contains three CSV files:
 * algorithm_metafeatures.csv: Each line corresponds to one of the over 1200 candidate algorithms. The first element gives an id of the algorithm which is described by the line, whereas the second one gives a textual representation of the candidate algorithm in the JSON format. The third and last element gives the feature representation of the associated algorithm as described earlier.
 * algorithm_evaluations_with_timeouts.csv: Each line corresponds to an evaluation of an algorithm on a dataset. The first element gives the seed used for the evaluation, the second element gives the ID of the associated dataset, the third element gives the textual description of the algorithm used for the evaluation and the fourth element gives the ID of the algorithm which can be referred to to find it in the algorithm metafeature table. The fifth value gives the actual accuracy or a negative value if the evaluation timed out. The last value gives the stack-trace of any exception which occurred during the evaluation, i.e. timeout related exceptions.
 
-## Experiment and Execution Details
+## Execution Details (Getting The Code To Run)
 For the sake of reproducibility, we will detail how to reproduce the results presented in the paper below. 
 
-**Coming in the following days (status 20/11/19)**
+In order to reproduce the results by running our code, we assume that you have a MySQL server with version 5.7.9 running. It might also work with other versions, but we can only guarantee that our tables can be imported to that version. 
+
+Using that database server, you have to create a new database with a name of your choice where you import the three sql dumps featuring three tables compressed in [sql_tables.zip](sql_tables.zip). These three tables correspond to the benchmark dataset we described earlier and represent the same information in the form of SQL tables instead CSV files.
+
+As a next step, you have to create a configuration file entitled `experiment_runner.properties` in a `conf` folder either on the top level of your IDE project or next to the runnable jar. This configuration file should contain the following information:
+
+```
+## database settings
+db.host = my.sqlserver.com
+db.username = username
+db.password = password
+db.database = databasename
+db.table = tableWhereToPutTheResults
+db.ssl = true
+
+dataset_ids = 3, 40966, 6, 11, 12, 14, 15, 40975, 16, 18, 40978, 40979, 40982, 22, 23, 40983, 151, 40984, 1049, 1050, 28, 29, 1053, 31, 32, 40994, 37, 38, 4134, 1063, 1067, 1068, 44, 300, 46, 50, 307, 40499, 1461, 1462, 54, 182, 4534, 1590, 1464, 4538, 188, 6332, 1468, 1475, 41027, 1478, 1480, 458, 1485, 1486, 1487, 1489, 23381, 469, 1494, 1497, 40668, 1501, 23517, 40670, 1510, 40701
+```
+
+You have to adapt all entries starting with `db.` according to your database server setup. The entries have the following meaning:
+* `db.host`: the address of your database server
+* `db.username`: the username the code can use to access the database
+* `db.password`: the password the code can use to access the database
+* `db.database`: the name of the database where you imported the tables
+* `db.table`: the name of the table, where results should be stored. This is created automatically by the code if it does not exist yet and should NOT be created manually.
+* `db.ssl`: whether ssl should be used or not
+
+Furthermore, the neural network used by the dyad ranking approach requires a configuration file with the following content entiteled `plnet.properties` in the directory `conf/plNet`:
+```
+plnet.learningrate = 0.01
+plnet.hidden.nodes = 50,50,30,20,20
+plnet.seed = 1
+plnet.hidden.activation.function = SIGMOID
+plnet.epochs = 0
+plnet.minibatch.size = 20
+plnet.early.stopping.interval = 1
+plnet.early.stopping.patience = 20
+plnet.early.stopping.train.ratio = 0.8
+plnet.early.stopping.retrain = true
+```
+
+After this file has been created, you can execute the main method of the class `de.upb.isml.tornede.ecai2020.experiments.evaluator.ExperimentRunnerEcai` in order to run all experiments which we performed for the paper. The results will be stored in the table given in the configuration file and has the following columns 
+
+* `dataset_split`: The id of the split wrt to the 10-fold crossvalidation on the datasets
+* `approach`: The name of the approach which is evaluted.
+* `test_dataset_id`: The id of the test dataset for which the evaluation is performed.
+* `ranking_to_test`: The id of the ranking to test. Recall that we sample 100 rankings of length 10 to compare against.
+* `metric`: The name of the metric for which the result is reported.
+* `metric_result`: The result of the evaluation.
+
+In order to obtain the results reported in the paper, you have to group by approach and metric and aggregate the metric results. This can be easily done via an SQL query.
+
+For reproducing the results wrt. significance, you have to .... <span style="color:red">TODO@Marcel</span>.
+
+
+
+## Configuration Details
+The following configuration details did not find a spot within the paper: 
+* The neural network we use to model the utility function for the dyad ranking approach is implemented in [DL4J](https://deeplearning4j.org/) and uses the parameters given in the configuration file called `plnet.properties` described earlier.
