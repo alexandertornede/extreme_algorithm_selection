@@ -1,6 +1,7 @@
 package de.upb.isml.tornede.ecai2020.experiments.rankers;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,7 +28,7 @@ public class KnnRanker extends NonRandomIdBasedRanker {
 	}
 
 	@Override
-	public void train(List<Integer> trainingDatasetIds) {
+	public void train(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds) {
 		this.trainingDatasetIds = new ArrayList<>(trainingDatasetIds);
 	}
 
@@ -35,7 +36,7 @@ public class KnnRanker extends NonRandomIdBasedRanker {
 	public List<Pair<Integer, Double>> getRankingOfPipelinesOnDataset(List<Integer> pipelineIdsToRank, int datasetId) {
 		AveragePerformanceRanker averageRankRanker = new AveragePerformanceRanker(pipelinePerformanceStorage);
 		List<Integer> kNearestNeighborDatasets = findKNearestDatasets(datasetId, k);
-		averageRankRanker.train(kNearestNeighborDatasets);
+		averageRankRanker.train(kNearestNeighborDatasets, Collections.emptyList());
 		return averageRankRanker.getRankingOfPipelinesOnDataset(pipelineIdsToRank, datasetId);
 	}
 

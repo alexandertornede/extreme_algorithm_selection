@@ -25,10 +25,10 @@ public class RandomPerAlgorithmRegressionDatasetGenerator extends AbstractPerAlg
 	}
 
 	@Override
-	public List<Pair<Integer, Instances>> generateTrainingDataset(List<Integer> trainingDatasetIds) {
+	public List<Pair<Integer, Instances>> generateTrainingDataset(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds) {
 		List<Pair<Integer, Instances>> algorithmIdTrainingDatasetPairs = new ArrayList<>();
 
-		for (int pipelineId : pipelinePerformanceStorage.getPipelineIds()) {
+		for (int pipelineId : trainingPipelineIds) {
 			ArrayList<Attribute> datasetFeatureAttributes = getAttributeInfo();
 			Attribute targetAttribute = new Attribute("performance");
 			datasetFeatureAttributes.add(targetAttribute);

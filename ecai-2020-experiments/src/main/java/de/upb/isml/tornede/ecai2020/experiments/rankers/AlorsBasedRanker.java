@@ -48,7 +48,7 @@ public class AlorsBasedRanker implements IdBasedRanker {
 	}
 
 	@Override
-	public void train(List<Integer> trainingDatasetIds) {
+	public void train(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds) {
 		String pathToCFOutputFolder = PATH_TO_COFIRANK_OUTPUTFOLDER + "_" + randomSeed + "_" + performanceMeasureToOptimize;
 		File outputFolder = new File(pathToCFOutputFolder);
 		if (!outputFolder.exists()) {

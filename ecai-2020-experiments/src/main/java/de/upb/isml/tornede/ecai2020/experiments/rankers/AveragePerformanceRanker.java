@@ -23,7 +23,7 @@ public class AveragePerformanceRanker extends NonRandomIdBasedRanker {
 	}
 
 	@Override
-	public void train(List<Integer> trainingDatasetIds) {
+	public void train(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds) {
 		List<Integer> pipelineIds = pipelinePerformanceStorage.getPipelineIds();
 		Map<Integer, DescriptiveStatistics> pipelineToStatisticsMap = new HashMap<>();
 		for (int pipelineId : pipelineIds) {

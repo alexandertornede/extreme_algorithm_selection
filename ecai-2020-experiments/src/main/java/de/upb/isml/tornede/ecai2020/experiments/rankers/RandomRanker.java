@@ -12,7 +12,7 @@ public class RandomRanker implements IdBasedRanker {
 	private Random random;
 
 	@Override
-	public void train(List<Integer> trainingDatasetIds) {
+	public void train(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds) {
 		// nothing to do here
 	}
 

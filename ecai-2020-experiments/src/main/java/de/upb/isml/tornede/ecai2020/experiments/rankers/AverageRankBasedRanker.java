@@ -25,7 +25,7 @@ public class AverageRankBasedRanker extends NonRandomIdBasedRanker {
 	}
 
 	@Override
-	public void train(List<Integer> trainingDatasetIds) {
+	public void train(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds) {
 		Map<Integer, DescriptiveStatistics> pipelineToStatisticsMap = new HashMap<>();
 		for (int datasetId : trainingDatasetIds) {
 			List<Integer> pipelineSortedAccordingToPerformanceInDecreasingOrder = pipelineIds.stream().map(p -> new Pair<>(p, pipelinePerformanceStorage.getPerformanceForPipelineWithIdOnDatasetWithId(p, datasetId)))

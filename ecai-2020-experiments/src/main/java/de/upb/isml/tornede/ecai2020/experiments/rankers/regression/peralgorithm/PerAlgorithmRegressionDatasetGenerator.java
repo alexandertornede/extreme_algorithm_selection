@@ -9,7 +9,7 @@ import weka.core.Instances;
 
 public interface PerAlgorithmRegressionDatasetGenerator {
 
-	public List<Pair<Integer, Instances>> generateTrainingDataset(List<Integer> trainingDatasetIds);
+	public List<Pair<Integer, Instances>> generateTrainingDataset(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds);
 
 	public void initialize(long randomSeed);
 

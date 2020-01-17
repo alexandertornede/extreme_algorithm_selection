@@ -30,8 +30,7 @@ public class DyadRankingImitatingRegressionDatasetGenerator extends AbstractRegr
 	}
 
 	@Override
-	public Instances generateTrainingDataset(List<Integer> trainingDatasetIds) {
-		List<Integer> pipelineIds = pipelinePerformanceStorage.getPipelineIds();
+	public Instances generateTrainingDataset(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds) {
 
 		List<Attribute> datasetFeatureAttributes = createDatasetAttributeList();
 		List<Attribute> pipelineFeatureAttributes = createAlgorithmAttributeList();
@@ -50,7 +49,7 @@ public class DyadRankingImitatingRegressionDatasetGenerator extends AbstractRegr
 				Set<Double> performancesSeen = new HashSet<>(lengthOfRanking);
 
 				while (pipelineIdsToUse.size() < lengthOfRanking) {
-					int randomPipelineId = pipelineIds.get(random.nextInt(pipelineIds.size()));
+					int randomPipelineId = trainingPipelineIds.get(random.nextInt(trainingPipelineIds.size()));
 					if (!pipelineIdsToUse.contains(randomPipelineId)) {
 						double performanceOfId = pipelinePerformanceStorage.getPerformanceForPipelineWithIdOnDatasetWithId(randomPipelineId, datasetId);
 						if (performanceOfId > 0 && !performancesSeen.contains(performanceOfId)) {

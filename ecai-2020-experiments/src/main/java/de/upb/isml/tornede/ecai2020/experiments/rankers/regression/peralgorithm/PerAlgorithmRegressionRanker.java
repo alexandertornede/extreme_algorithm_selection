@@ -42,9 +42,9 @@ public class PerAlgorithmRegressionRanker implements IdBasedRanker {
 	}
 
 	@Override
-	public void train(List<Integer> trainingDatasetIds) {
+	public void train(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds) {
 		algorithmToTrainedRegressionFunctionMap = new HashMap<>();
-		List<Pair<Integer, Instances>> algorithmDatasetPairs = datasetGenerator.generateTrainingDataset(trainingDatasetIds);
+		List<Pair<Integer, Instances>> algorithmDatasetPairs = datasetGenerator.generateTrainingDataset(trainingDatasetIds, trainingPipelineIds);
 		attributeInfo = datasetGenerator.getAttributeInfo();
 		for (Integer algorithmId : pipelinePerformanceStorage.getPipelineIds()) {
 			try {
