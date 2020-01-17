@@ -44,17 +44,6 @@ public class DyadRankingImitatingRegressionDatasetGenerator extends AbstractRegr
 		Instances instances = new Instances("dataset", attributeInfo, 0);
 		instances.setClassIndex(instances.numAttributes() - 1);
 
-		for (int pipelineId : pipelinePerformanceStorage.getPipelineIds()) {
-			for (int trainingDatasetId : trainingDatasetIds) {
-				double targetValue = pipelinePerformanceStorage.getPerformanceForPipelineWithIdOnDatasetWithId(pipelineId, trainingDatasetId);
-				if (targetValue > 0) {
-					Instance instance = createInstanceForPipelineAndDataset(pipelineId, trainingDatasetId);
-					instance.setDataset(instances);
-					instances.add(instance);
-				}
-			}
-		}
-
 		for (int datasetId : trainingDatasetIds) {
 			for (int i = 0; i < numberOfRankingsPerTrainingDataset; i++) {
 				List<Integer> pipelineIdsToUse = new ArrayList<>(lengthOfRanking);
@@ -76,6 +65,9 @@ public class DyadRankingImitatingRegressionDatasetGenerator extends AbstractRegr
 				}
 			}
 		}
+
+		System.out.println("Generated dataset with " + instances.size() + " instances.");
+
 		return instances;
 	}
 

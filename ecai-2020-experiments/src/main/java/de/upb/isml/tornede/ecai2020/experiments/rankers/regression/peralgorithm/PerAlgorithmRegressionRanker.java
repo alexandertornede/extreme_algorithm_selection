@@ -22,13 +22,13 @@ public class PerAlgorithmRegressionRanker implements IdBasedRanker {
 
 	private PipelinePerformanceStorage pipelinePerformanceStorage;
 	private DatasetFeatureRepresentationMap datasetFeatureRepresentationMap;
-	private RandomPerAlgorithmRegressionDatasetGenerator datasetGenerator;
+	private PerAlgorithmRegressionDatasetGenerator datasetGenerator;
 	private Classifier nonTrainedRegressionFunction;
 	private Map<Integer, Classifier> algorithmToTrainedRegressionFunctionMap;
 
 	private ArrayList<Attribute> attributeInfo;
 
-	public PerAlgorithmRegressionRanker(PipelinePerformanceStorage pipelinePerformanceStorage, DatasetFeatureRepresentationMap datasetFeatureRepresentationMap, RandomPerAlgorithmRegressionDatasetGenerator datasetGenerator,
+	public PerAlgorithmRegressionRanker(PipelinePerformanceStorage pipelinePerformanceStorage, DatasetFeatureRepresentationMap datasetFeatureRepresentationMap, PerAlgorithmRegressionDatasetGenerator datasetGenerator,
 			Classifier nonTrainedRegressionFunction) {
 		this.pipelinePerformanceStorage = pipelinePerformanceStorage;
 		this.datasetFeatureRepresentationMap = datasetFeatureRepresentationMap;
