@@ -42,7 +42,7 @@ public class AlgorithmAndDatasetFeatureRegressionRanker implements IdBasedRanker
 	@Override
 	public void train(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds) {
 
-		Instances instances = regressionDatasetGenerator.generateTrainingDataset(trainingDatasetIds, trainingPipelineIds);
+		Instances instances = regressionDatasetGenerator.generateTrainingDataset(trainingDatasetIds, trainingPipelineIds).getX();
 		attributeInfo = regressionDatasetGenerator.getAttributeInfo();
 
 		try {

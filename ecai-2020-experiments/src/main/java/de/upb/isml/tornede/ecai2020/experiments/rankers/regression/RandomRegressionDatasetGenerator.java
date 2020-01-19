@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import ai.libs.jaicore.basic.sets.Pair;
 import de.upb.isml.tornede.ecai2020.experiments.storage.DatasetFeatureRepresentationMap;
 import de.upb.isml.tornede.ecai2020.experiments.storage.PipelineFeatureRepresentationMap;
 import de.upb.isml.tornede.ecai2020.experiments.storage.PipelinePerformanceStorage;
@@ -28,7 +29,7 @@ public class RandomRegressionDatasetGenerator extends AbstractRegressionDatasetG
 	}
 
 	@Override
-	public Instances generateTrainingDataset(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds) {
+	public Pair<Instances, List<Pair<Integer, Integer>>> generateTrainingDataset(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds) {
 		List<Attribute> datasetFeatureAttributes = createDatasetAttributeList();
 		List<Attribute> pipelineFeatureAttributes = createAlgorithmAttributeList();
 		Attribute targetAttribute = new Attribute("performance");
@@ -40,6 +41,8 @@ public class RandomRegressionDatasetGenerator extends AbstractRegressionDatasetG
 		Instances instances = new Instances("dataset", attributeInfo, 0);
 		instances.setClassIndex(instances.numAttributes() - 1);
 
+		List<Pair<Integer, Integer>> datasetAndAlgorithmPairs = new ArrayList<>();
+
 		for (int pipelineId : trainingPipelineIds) {
 			for (int trainingDatasetId : trainingDatasetIds) {
 				double targetValue = pipelinePerformanceStorage.getPerformanceForPipelineWithIdOnDatasetWithId(pipelineId, trainingDatasetId);
@@ -47,6 +50,8 @@ public class RandomRegressionDatasetGenerator extends AbstractRegressionDatasetG
 					Instance instance = createInstanceForPipelineAndDataset(pipelineId, trainingDatasetId);
 					instance.setDataset(instances);
 					instances.add(instance);
+
+					datasetAndAlgorithmPairs.add(new Pair<>(trainingDatasetId, pipelineId));
 				}
 			}
 		}
@@ -54,7 +59,7 @@ public class RandomRegressionDatasetGenerator extends AbstractRegressionDatasetG
 		instances = sampleInstances(instances, datasetSize);
 		System.out.println("Sampled dataset down to " + instances.size() + " instances.");
 
-		return instances;
+		return new Pair<>(instances, datasetAndAlgorithmPairs);
 	}
 
 	private Instances sampleInstances(Instances instances, int amount) {

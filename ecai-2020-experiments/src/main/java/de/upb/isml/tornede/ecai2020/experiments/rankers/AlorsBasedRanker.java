@@ -2,6 +2,7 @@ package de.upb.isml.tornede.ecai2020.experiments.rankers;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,6 +15,7 @@ import de.upb.isml.tornede.ecai2020.experiments.alors.matrix_completion.MatrixCo
 import de.upb.isml.tornede.ecai2020.experiments.alors.matrix_completion.ModelBasedMatrixCompleter;
 import de.upb.isml.tornede.ecai2020.experiments.alors.matrix_completion.cofirank.CofiConfig;
 import de.upb.isml.tornede.ecai2020.experiments.alors.matrix_completion.cofirank.CofirankCPlusPlus;
+import de.upb.isml.tornede.ecai2020.experiments.rankers.regression.RegressionDatasetGenerator;
 import de.upb.isml.tornede.ecai2020.experiments.storage.DatasetFeatureRepresentationMap;
 import de.upb.isml.tornede.ecai2020.experiments.storage.PipelinePerformanceStorage;
 
@@ -27,6 +29,7 @@ public class AlorsBasedRanker implements IdBasedRanker {
 
 	private DatasetFeatureRepresentationMap datasetFeatureRepresentationMap;
 	private PipelinePerformanceStorage pipelinePerformanceStorage;
+	private RegressionDatasetGenerator regressionDatasetGenerator;
 
 	private List<Integer> datasetIdsSorted;
 	private List<Integer> pipelineIdsSorted;
@@ -36,10 +39,12 @@ public class AlorsBasedRanker implements IdBasedRanker {
 	private String performanceMeasureToOptimize;
 	private long randomSeed;
 
-	public AlorsBasedRanker(DatasetFeatureRepresentationMap datasetFeatureRepresentationMap, PipelinePerformanceStorage pipelinePerformanceStorage, String performanceMeasureToOptimize) {
+	public AlorsBasedRanker(DatasetFeatureRepresentationMap datasetFeatureRepresentationMap, PipelinePerformanceStorage pipelinePerformanceStorage, String performanceMeasureToOptimize,
+			RegressionDatasetGenerator regressionDatasetGenerator) {
 		this.datasetFeatureRepresentationMap = datasetFeatureRepresentationMap;
 		this.pipelinePerformanceStorage = pipelinePerformanceStorage;
 		this.performanceMeasureToOptimize = performanceMeasureToOptimize;
+		this.regressionDatasetGenerator = regressionDatasetGenerator;
 	}
 
 	@Override
@@ -66,13 +71,17 @@ public class AlorsBasedRanker implements IdBasedRanker {
 		pipelineIdsSorted = pipelinePerformanceStorage.getPipelineIds().stream().sorted(Comparator.comparingInt(i -> i)).collect(Collectors.toList());
 
 		double[][] performanceMatrix = new double[datasetIdsSorted.size()][pipelineIdsSorted.size()];
-		for (int i = 0; i < datasetIdsSorted.size(); i++) {
-			int datasetId = datasetIdsSorted.get(i);
-			for (int j = 0; j < pipelineIdsSorted.size(); j++) {
-				int pipelineId = pipelineIdsSorted.get(j);
-				double performance = pipelinePerformanceStorage.getPerformanceForPipelineWithIdOnDatasetWithId(pipelineId, datasetId);
-				performanceMatrix[i][j] = performance; // *100
-			}
+		Arrays.fill(performanceMatrix, Double.NaN);
+
+		List<Pair<Integer, Integer>> datasetAndAlgorithmPairsForTraining = regressionDatasetGenerator.generateTrainingDataset(trainingDatasetIds, pipelineIdsSorted).getY();
+
+		for (Pair<Integer, Integer> datasetAndAlgorithmPair : datasetAndAlgorithmPairsForTraining) {
+			int datasetId = datasetAndAlgorithmPair.getX();
+			int indexOfDataset = datasetIdsSorted.indexOf(datasetId);
+			int pipelineId = datasetAndAlgorithmPair.getY();
+			int indexOfPipeline = pipelineIdsSorted.indexOf(pipelineId);
+			double performance = pipelinePerformanceStorage.getPerformanceForPipelineWithIdOnDatasetWithId(pipelineId, datasetId);
+			performanceMatrix[indexOfDataset][indexOfPipeline] = performance;
 		}
 
 		double[][] datasetFeatureMatrix = new double[datasetIdsSorted.size()][datasetFeatureRepresentationMap.getNumberOfFeatures()];

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import ai.libs.jaicore.basic.sets.Pair;
 import de.upb.isml.tornede.ecai2020.experiments.storage.DatasetFeatureRepresentationMap;
 import de.upb.isml.tornede.ecai2020.experiments.storage.PipelineFeatureRepresentationMap;
 import de.upb.isml.tornede.ecai2020.experiments.storage.PipelinePerformanceStorage;
@@ -30,7 +31,7 @@ public class DyadRankingImitatingRegressionDatasetGenerator extends AbstractRegr
 	}
 
 	@Override
-	public Instances generateTrainingDataset(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds) {
+	public Pair<Instances, List<Pair<Integer, Integer>>> generateTrainingDataset(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds) {
 
 		List<Attribute> datasetFeatureAttributes = createDatasetAttributeList();
 		List<Attribute> pipelineFeatureAttributes = createAlgorithmAttributeList();
@@ -39,6 +40,8 @@ public class DyadRankingImitatingRegressionDatasetGenerator extends AbstractRegr
 		attributeInfo.addAll(datasetFeatureAttributes);
 		attributeInfo.addAll(pipelineFeatureAttributes);
 		attributeInfo.add(targetAttribute);
+
+		List<Pair<Integer, Integer>> datasetAndAlgorithmPairs = new ArrayList<>();
 
 		Instances instances = new Instances("dataset", attributeInfo, 0);
 		instances.setClassIndex(instances.numAttributes() - 1);
@@ -59,6 +62,8 @@ public class DyadRankingImitatingRegressionDatasetGenerator extends AbstractRegr
 							Instance instance = createInstanceForPipelineAndDataset(randomPipelineId, datasetId);
 							instance.setDataset(instances);
 							instances.add(instance);
+
+							datasetAndAlgorithmPairs.add(new Pair<>(datasetId, randomPipelineId));
 						}
 					}
 				}
@@ -67,7 +72,7 @@ public class DyadRankingImitatingRegressionDatasetGenerator extends AbstractRegr
 
 		System.out.println("Generated dataset with " + instances.size() + " instances.");
 
-		return instances;
+		return new Pair<>(instances, datasetAndAlgorithmPairs);
 	}
 
 	@Override
