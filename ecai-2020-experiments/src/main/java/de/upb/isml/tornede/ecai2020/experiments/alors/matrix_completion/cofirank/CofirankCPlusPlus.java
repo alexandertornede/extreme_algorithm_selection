@@ -113,8 +113,10 @@ public class CofirankCPlusPlus implements ModelBasedMatrixCompleter {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File(location)))) {
 			for (int i = 0; i < matrix.length; i++) {
 				for (int j = 0; j < matrix[i].length; j++) {
-					if (!Double.isNaN(matrix[i][j])) {
+					if (!Double.isNaN(matrix[i][j]) && matrix[i][j] > 0) {
 						writer.write(String.format(Locale.US, "%d:%f ", j + 1, matrix[i][j]));
+					} else {
+						writer.write(String.format(Locale.US, "%d:? ", j + 1));
 					}
 				}
 
@@ -151,7 +153,7 @@ public class CofirankCPlusPlus implements ModelBasedMatrixCompleter {
 			while (line != null) {
 				// parse lsvm file
 				line = line.trim();
-				if (line != "") {
+				if (line != "" && !line.trim().isEmpty()) {
 					String[] parts = line.split(" ");
 					double[] entries = new double[parts.length];
 

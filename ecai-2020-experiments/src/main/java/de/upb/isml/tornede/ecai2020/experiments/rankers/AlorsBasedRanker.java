@@ -50,28 +50,32 @@ public class AlorsBasedRanker implements IdBasedRanker {
 	@Override
 	public void initialize(long randomSeed) {
 		this.randomSeed = randomSeed;
+		this.regressionDatasetGenerator.initialize(randomSeed);
 	}
 
 	@Override
 	public void train(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds) {
-		String pathToCFOutputFolder = PATH_TO_COFIRANK_OUTPUTFOLDER + "_" + randomSeed + "_" + performanceMeasureToOptimize;
+
+		datasetIdsSorted = trainingDatasetIds.stream().sorted(Comparator.comparingInt(i -> i)).collect(Collectors.toList());
+
+		pipelineIdsSorted = pipelinePerformanceStorage.getPipelineIds().stream().sorted(Comparator.comparingInt(i -> i)).collect(Collectors.toList());
+
+		String pathToCFOutputFolder = PATH_TO_COFIRANK_OUTPUTFOLDER + "_" + randomSeed + "_" + performanceMeasureToOptimize + "_" + regressionDatasetGenerator.getName();
 		File outputFolder = new File(pathToCFOutputFolder);
 		if (!outputFolder.exists()) {
 			outputFolder.mkdirs();
 		}
 
 		CofiConfig config = new CofiConfig(PATH_TO_COFIRANK_EXECUTABLE, pathToCFOutputFolder + "/" + NAME_OF_COFIRANK_CONFIGURATION, pathToCFOutputFolder, pathToCFOutputFolder + "/" + NAME_OF_COFIRANK_TRAINFILE,
-				pathToCFOutputFolder + "/" + NAME_OF_COFIRANK_TESTFILE);
+				pathToCFOutputFolder + "/" + NAME_OF_COFIRANK_TESTFILE, datasetIdsSorted.size(), pipelineIdsSorted.size());
 		config.setOptimizedMeasure(performanceMeasureToOptimize);
 		ModelBasedMatrixCompleter matrixCompleter = new CofirankCPlusPlus(config);
 		this.alors = new Alors(matrixCompleter);
 
-		datasetIdsSorted = trainingDatasetIds.stream().sorted(Comparator.comparingInt(i -> i)).collect(Collectors.toList());
-
-		pipelineIdsSorted = pipelinePerformanceStorage.getPipelineIds().stream().sorted(Comparator.comparingInt(i -> i)).collect(Collectors.toList());
-
 		double[][] performanceMatrix = new double[datasetIdsSorted.size()][pipelineIdsSorted.size()];
-		Arrays.fill(performanceMatrix, Double.NaN);
+		for (int i = 0; i < performanceMatrix.length; i++) {
+			Arrays.fill(performanceMatrix[i], Double.NaN);
+		}
 
 		List<Pair<Integer, Integer>> datasetAndAlgorithmPairsForTraining = regressionDatasetGenerator.generateTrainingDataset(trainingDatasetIds, pipelineIdsSorted).getY();
 
@@ -83,6 +87,9 @@ public class AlorsBasedRanker implements IdBasedRanker {
 			double performance = pipelinePerformanceStorage.getPerformanceForPipelineWithIdOnDatasetWithId(pipelineId, datasetId);
 			performanceMatrix[indexOfDataset][indexOfPipeline] = performance;
 		}
+
+		// encode one entry in the last dimension as 0 such that CofiRANK knows how many algorithms we have
+		// performanceMatrix[0][pipelineIdsSorted.size() - 1] = 0;
 
 		double[][] datasetFeatureMatrix = new double[datasetIdsSorted.size()][datasetFeatureRepresentationMap.getNumberOfFeatures()];
 		for (int i = 0; i < datasetIdsSorted.size(); i++) {
@@ -121,7 +128,7 @@ public class AlorsBasedRanker implements IdBasedRanker {
 
 	@Override
 	public String getName() {
-		return "alors_cofirank_" + performanceMeasureToOptimize;
+		return "alors_cofirank_" + performanceMeasureToOptimize + "_" + regressionDatasetGenerator.getName();
 	}
 
 }

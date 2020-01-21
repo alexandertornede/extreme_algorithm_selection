@@ -1,42 +1,53 @@
 package de.upb.isml.tornede.ecai2020.experiments.rankers;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.tsc.distances.ITimeSeriesDistance;
+import de.upb.isml.tornede.ecai2020.experiments.rankers.regression.RegressionDatasetGenerator;
 import de.upb.isml.tornede.ecai2020.experiments.storage.DatasetFeatureRepresentationMap;
 import de.upb.isml.tornede.ecai2020.experiments.storage.PipelinePerformanceStorage;
 
-public class KnnRanker extends NonRandomIdBasedRanker {
+public class KnnRanker implements IdBasedRanker {
 
 	private PipelinePerformanceStorage pipelinePerformanceStorage;
 	private DatasetFeatureRepresentationMap datasetFeatureRepresentationMap;
 	private List<Integer> trainingDatasetIds;
+	private List<Integer> trainingPipelineIds;
 
 	private ITimeSeriesDistance distanceFunction;
 	private int k;
 
-	public KnnRanker(PipelinePerformanceStorage pipelinePerformanceStorage, DatasetFeatureRepresentationMap datasetFeatureRepresentationMap, ITimeSeriesDistance distanceFunction, int k) {
+	private RegressionDatasetGenerator regressionDatasetGenerator;
+	private List<Pair<Integer, Integer>> datasetAndAlgorithmTrainingPairs;
+
+	public KnnRanker(PipelinePerformanceStorage pipelinePerformanceStorage, DatasetFeatureRepresentationMap datasetFeatureRepresentationMap, ITimeSeriesDistance distanceFunction, int k,
+			RegressionDatasetGenerator regressionDatasetGenerator) {
 		this.pipelinePerformanceStorage = pipelinePerformanceStorage;
 		this.datasetFeatureRepresentationMap = datasetFeatureRepresentationMap;
 		this.distanceFunction = distanceFunction;
 		this.k = k;
+		this.regressionDatasetGenerator = regressionDatasetGenerator;
 	}
 
 	@Override
 	public void train(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds) {
 		this.trainingDatasetIds = new ArrayList<>(trainingDatasetIds);
+		this.trainingPipelineIds = new ArrayList<>(trainingPipelineIds);
+		this.datasetAndAlgorithmTrainingPairs = regressionDatasetGenerator.generateTrainingDataset(trainingDatasetIds, trainingPipelineIds).getY();
 	}
 
 	@Override
 	public List<Pair<Integer, Double>> getRankingOfPipelinesOnDataset(List<Integer> pipelineIdsToRank, int datasetId) {
-		AveragePerformanceRanker averageRankRanker = new AveragePerformanceRanker(pipelinePerformanceStorage);
+
 		List<Integer> kNearestNeighborDatasets = findKNearestDatasets(datasetId, k);
-		averageRankRanker.train(kNearestNeighborDatasets, Collections.emptyList());
+
+		AveragePerformanceRanker averageRankRanker = new AveragePerformanceRanker(pipelinePerformanceStorage, datasetAndAlgorithmTrainingPairs);
+		averageRankRanker.train(kNearestNeighborDatasets, trainingPipelineIds);
+
 		return averageRankRanker.getRankingOfPipelinesOnDataset(pipelineIdsToRank, datasetId);
 	}
 
@@ -52,6 +63,11 @@ public class KnnRanker extends NonRandomIdBasedRanker {
 
 	@Override
 	public String getName() {
-		return k + "_nn_" + distanceFunction.getClass().getSimpleName().toLowerCase();
+		return k + "_nn_" + distanceFunction.getClass().getSimpleName().toLowerCase() + "_" + regressionDatasetGenerator.getName();
+	}
+
+	@Override
+	public void initialize(long randomSeed) {
+		regressionDatasetGenerator.initialize(randomSeed);
 	}
 }

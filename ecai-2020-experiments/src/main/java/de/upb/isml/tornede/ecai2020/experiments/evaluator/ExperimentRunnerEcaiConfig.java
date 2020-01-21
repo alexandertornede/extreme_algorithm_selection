@@ -13,6 +13,7 @@ public interface ExperimentRunnerEcaiConfig extends IDatabaseConfig {
 	public static final String AMOUNT_CPUS_NAME = "amount_cpus";
 	public static final String FOLDS_ON_DATASETS_NAME = "folds_on_datasets";
 	public static final String FOLDS_ON_ALGORITHMS_NAME = "folds_on_algorithms";
+	public static final String NAME_APPROACHES = "approaches";
 
 	@Key(DATASET_IDS_NAME)
 	public List<Integer> getDatasetIds();
@@ -25,4 +26,7 @@ public interface ExperimentRunnerEcaiConfig extends IDatabaseConfig {
 
 	@Key(FOLDS_ON_ALGORITHMS_NAME)
 	public boolean foldsOnAlgorithms();
+
+	@Key(NAME_APPROACHES)
+	public List<String> getApproaches();
 }
