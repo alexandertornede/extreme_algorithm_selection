@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -18,21 +19,72 @@ public class AveragePerformanceRanker implements IdBasedRanker {
 	private RegressionDatasetGenerator regressionDatasetGenerator;
 	private List<Pair<Integer, Integer>> availableDatasetAndAlgorithmTrainingPairs;
 
+	private boolean useBayesianAveraging;
+
 	// Stores the average performance as a sorted list (in descending order) of pipeline ids and their respective average performance across training datasets
 	private List<Pair<Integer, Double>> averagePerformanceOfPipelines;
 
-	public AveragePerformanceRanker(PipelinePerformanceStorage pipelinePerformanceStorage, RegressionDatasetGenerator regressionDatasetGenerator) {
+	public AveragePerformanceRanker(PipelinePerformanceStorage pipelinePerformanceStorage, RegressionDatasetGenerator regressionDatasetGenerator, boolean useBayesianAveraging) {
 		this.pipelinePerformanceStorage = pipelinePerformanceStorage;
 		this.regressionDatasetGenerator = regressionDatasetGenerator;
+		this.useBayesianAveraging = useBayesianAveraging;
 	}
 
-	public AveragePerformanceRanker(PipelinePerformanceStorage pipelinePerformanceStorage, List<Pair<Integer, Integer>> availableDatasetAndAlgorithmTrainingPairs) {
+	public AveragePerformanceRanker(PipelinePerformanceStorage pipelinePerformanceStorage, List<Pair<Integer, Integer>> availableDatasetAndAlgorithmTrainingPairs, boolean useBayesianAveraging) {
 		this.pipelinePerformanceStorage = pipelinePerformanceStorage;
 		this.availableDatasetAndAlgorithmTrainingPairs = availableDatasetAndAlgorithmTrainingPairs;
+		this.useBayesianAveraging = useBayesianAveraging;
 	}
 
 	@Override
 	public void train(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds) {
+		if (useBayesianAveraging) {
+			trainWithBayesianAveraging(trainingDatasetIds, trainingPipelineIds);
+		} else {
+			trainWithNormalAveraging(trainingDatasetIds, trainingPipelineIds);
+		}
+	}
+
+	private void trainWithBayesianAveraging(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds) {
+		Map<Integer, DescriptiveStatistics> sparsePipelineToStatisticsMap = computeSparsePipelineToStatisticsMap(trainingDatasetIds, trainingPipelineIds);
+		Map<Integer, DescriptiveStatistics> densePipelineToStatisticsMap = computeDensePipelineToStatisticsMap(trainingDatasetIds, trainingPipelineIds);
+
+		for (Entry<Integer, DescriptiveStatistics> entry : sparsePipelineToStatisticsMap.entrySet()) {
+			for (double performanceValue : entry.getValue().getValues()) {
+				densePipelineToStatisticsMap.get(entry.getKey()).addValue(performanceValue);
+			}
+		}
+
+		List<Integer> pipelineIds = pipelinePerformanceStorage.getPipelineIds();
+
+		averagePerformanceOfPipelines = pipelineIds.stream().map(id -> new Pair<>(id, getAveragePerformanceOfPipeline(id, densePipelineToStatisticsMap))).sorted(Comparator.comparingDouble(p -> ((Pair<Integer, Double>) p).getY()).reversed())
+				.collect(Collectors.toList());
+	}
+
+	private Map<Integer, DescriptiveStatistics> computeDensePipelineToStatisticsMap(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds) {
+		Map<Integer, DescriptiveStatistics> pipelineToStatisticsMap = new HashMap<>();
+		for (int datasetId : trainingDatasetIds) {
+			for (int pipelineId : trainingPipelineIds) {
+				if (!pipelineToStatisticsMap.containsKey(pipelineId)) {
+					pipelineToStatisticsMap.put(pipelineId, new DescriptiveStatistics());
+				}
+				double performanceOfPipelineOnDataset = pipelinePerformanceStorage.getPerformanceForPipelineWithIdOnDatasetWithId(pipelineId, datasetId);
+				if (performanceOfPipelineOnDataset > 0) {
+					pipelineToStatisticsMap.get(pipelineId).addValue(performanceOfPipelineOnDataset);
+				}
+			}
+		}
+		return pipelineToStatisticsMap;
+	}
+
+	private void trainWithNormalAveraging(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds) {
+		Map<Integer, DescriptiveStatistics> pipelineToStatisticsMap = computeSparsePipelineToStatisticsMap(trainingDatasetIds, trainingPipelineIds);
+		List<Integer> pipelineIds = pipelinePerformanceStorage.getPipelineIds();
+		averagePerformanceOfPipelines = pipelineIds.stream().map(id -> new Pair<>(id, getAveragePerformanceOfPipeline(id, pipelineToStatisticsMap))).sorted(Comparator.comparingDouble(p -> ((Pair<Integer, Double>) p).getY()).reversed())
+				.collect(Collectors.toList());
+	}
+
+	private Map<Integer, DescriptiveStatistics> computeSparsePipelineToStatisticsMap(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds) {
 		List<Pair<Integer, Integer>> datasetAndAlgorithmTrainingPairs = null;
 		if (regressionDatasetGenerator != null) {
 			datasetAndAlgorithmTrainingPairs = regressionDatasetGenerator.generateTrainingDataset(trainingDatasetIds, trainingPipelineIds).getY();
@@ -52,10 +104,7 @@ public class AveragePerformanceRanker implements IdBasedRanker {
 				pipelineToStatisticsMap.get(pipelineId).addValue(performanceOfPipelineOnDataset);
 			}
 		}
-
-		List<Integer> pipelineIds = pipelinePerformanceStorage.getPipelineIds();
-		averagePerformanceOfPipelines = pipelineIds.stream().map(id -> new Pair<>(id, getAveragePerformanceOfPipeline(id, pipelineToStatisticsMap))).sorted(Comparator.comparingDouble(p -> ((Pair<Integer, Double>) p).getY()).reversed())
-				.collect(Collectors.toList());
+		return pipelineToStatisticsMap;
 	}
 
 	private double getAveragePerformanceOfPipeline(int pipelineId, Map<Integer, DescriptiveStatistics> pipelineToStatisticsMap) {
@@ -73,7 +122,7 @@ public class AveragePerformanceRanker implements IdBasedRanker {
 
 	@Override
 	public String getName() {
-		return "average_performance_" + regressionDatasetGenerator.getName();
+		return "average_performance_" + regressionDatasetGenerator.getName() + (useBayesianAveraging ? "_bayesianAveraging" : "");
 	}
 
 	@Override

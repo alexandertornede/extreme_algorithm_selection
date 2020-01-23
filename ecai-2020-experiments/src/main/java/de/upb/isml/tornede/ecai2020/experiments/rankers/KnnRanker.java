@@ -20,17 +20,19 @@ public class KnnRanker implements IdBasedRanker {
 
 	private ITimeSeriesDistance distanceFunction;
 	private int k;
+	private boolean useBayesianAveraging;
 
 	private RegressionDatasetGenerator regressionDatasetGenerator;
 	private List<Pair<Integer, Integer>> datasetAndAlgorithmTrainingPairs;
 
-	public KnnRanker(PipelinePerformanceStorage pipelinePerformanceStorage, DatasetFeatureRepresentationMap datasetFeatureRepresentationMap, ITimeSeriesDistance distanceFunction, int k,
-			RegressionDatasetGenerator regressionDatasetGenerator) {
+	public KnnRanker(PipelinePerformanceStorage pipelinePerformanceStorage, DatasetFeatureRepresentationMap datasetFeatureRepresentationMap, ITimeSeriesDistance distanceFunction, int k, RegressionDatasetGenerator regressionDatasetGenerator,
+			boolean useBayesianAveraging) {
 		this.pipelinePerformanceStorage = pipelinePerformanceStorage;
 		this.datasetFeatureRepresentationMap = datasetFeatureRepresentationMap;
 		this.distanceFunction = distanceFunction;
 		this.k = k;
 		this.regressionDatasetGenerator = regressionDatasetGenerator;
+		this.useBayesianAveraging = useBayesianAveraging;
 	}
 
 	@Override
@@ -45,7 +47,7 @@ public class KnnRanker implements IdBasedRanker {
 
 		List<Integer> kNearestNeighborDatasets = findKNearestDatasets(datasetId, k);
 
-		AveragePerformanceRanker averageRankRanker = new AveragePerformanceRanker(pipelinePerformanceStorage, datasetAndAlgorithmTrainingPairs);
+		AveragePerformanceRanker averageRankRanker = new AveragePerformanceRanker(pipelinePerformanceStorage, datasetAndAlgorithmTrainingPairs, useBayesianAveraging);
 		averageRankRanker.train(kNearestNeighborDatasets, trainingPipelineIds);
 
 		return averageRankRanker.getRankingOfPipelinesOnDataset(pipelineIdsToRank, datasetId);
@@ -63,7 +65,7 @@ public class KnnRanker implements IdBasedRanker {
 
 	@Override
 	public String getName() {
-		return k + "_nn_" + distanceFunction.getClass().getSimpleName().toLowerCase() + "_" + regressionDatasetGenerator.getName();
+		return k + "_nn_" + distanceFunction.getClass().getSimpleName().toLowerCase() + "_" + regressionDatasetGenerator.getName() + (useBayesianAveraging ? "_bayesianAveraging" : "");
 	}
 
 	@Override
