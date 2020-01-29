@@ -6,7 +6,7 @@ import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 
 public interface DyadRankingTrainingDatasetGenerator {
 
-	public DyadRankingDataset generateTrainingDataset(List<Integer> trainingDatasetIds);
+	public DyadRankingDataset generateTrainingDataset(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds);
 
 	public void initialize(long randomSeed);
 

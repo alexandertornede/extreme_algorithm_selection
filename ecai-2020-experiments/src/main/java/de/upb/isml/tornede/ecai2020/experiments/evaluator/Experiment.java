@@ -41,17 +41,17 @@ public class Experiment {
 		createResultsTableIfNecessary();
 	}
 
-	public void runExperiment(int datasetSplit, List<Integer> trainingDatasets, List<Integer> testDatasets, IdBasedRanker ranker, List<Metric> metrics, int numberOfRankingsToTest, int amountOfPipelinesToSelect) throws SQLException {
-		List<Integer> pipelineIds = pipelinePerformanceStorage.getPipelineIds();
+	public void runExperiment(int datasetSplit, List<Integer> trainingDatasets, List<Integer> testDatasets, List<Integer> trainingAlgorithms, List<Integer> testAlgorithms, IdBasedRanker ranker, List<Metric> metrics,
+			int numberOfRankingsToTest, int amountOfPipelinesToSelect) throws SQLException {
 
 		OracleRanker oracleRanker = new OracleRanker(pipelinePerformanceStorage);
 
 		ranker.initialize(datasetSplit);
-		ranker.train(trainingDatasets);
+		ranker.train(trainingDatasets, trainingAlgorithms);
 
 		for (int datasetId : testDatasets) {
 			// restrict pipelines we want to rank to those where we know the ground truth
-			List<Integer> pipelinesToRank = pipelineIds.stream().filter(i -> pipelinePerformanceStorage.getPerformanceForPipelineWithIdOnDatasetWithId(i, datasetId) > 0).collect(Collectors.toList());
+			List<Integer> pipelinesToRank = testAlgorithms.stream().filter(i -> pipelinePerformanceStorage.getPerformanceForPipelineWithIdOnDatasetWithId(i, datasetId) > 0).collect(Collectors.toList());
 
 			for (int i = 0; i < numberOfRankingsToTest; i++) {
 				pipelinesToRank = getRandomPipelinesWithDistinctPerformance(datasetId, pipelinesToRank, amountOfPipelinesToSelect, new Random(datasetSplit * numberOfRankingsToTest + i));

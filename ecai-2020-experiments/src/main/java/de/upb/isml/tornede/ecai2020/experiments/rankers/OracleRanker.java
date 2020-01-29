@@ -16,7 +16,7 @@ public class OracleRanker extends NonRandomIdBasedRanker {
 	}
 
 	@Override
-	public void train(List<Integer> trainingDatasetIds) {
+	public void train(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds) {
 		// nothing to do here
 	}
 

@@ -43,6 +43,9 @@ public class CofiConfig {
 	private int ndcgKLoss = 10;
 	private double ndcgLossExponent = -0.25;
 
+	private int numberOfRows;
+	private int numberOfColumns;
+
 	/**
 	 * Create a new cofirank configuration with the given parameters that don't have
 	 * default values. Other parameters can be adapted with corresponding setters.
@@ -59,12 +62,14 @@ public class CofiConfig {
 	 * @param testFilePath the location of the testing data file (testing data
 	 *            file must always exist but can be empty)
 	 */
-	public CofiConfig(String executablePath, String configurationPath, String outFolderPath, String trainFilePath, String testFilePath) {
+	public CofiConfig(String executablePath, String configurationPath, String outFolderPath, String trainFilePath, String testFilePath, int numberOfRows, int numberOfColumns) {
 		this.executablePath = executablePath;
 		this.configurationPath = configurationPath;
 		this.outFolderPath = outFolderPath;
 		this.trainFilePath = trainFilePath;
 		this.testFilePath = testFilePath;
+		this.numberOfRows = numberOfRows;
+		this.numberOfColumns = numberOfColumns;
 	}
 
 	/**
@@ -88,6 +93,10 @@ public class CofiConfig {
 			writer.write(String.format(Locale.US, "string cofibmrm.evaluation WEAK%n"));
 			writer.write(String.format(Locale.US, "string cofi.outfolder %s/%n", outFolderPath));
 
+			// Training file
+			writer.write(String.format(Locale.US, "int cofi.trainfile.size1 %d%n", numberOfRows));
+			writer.write(String.format(Locale.US, "int cofi.trainfile.size2 %d%n", numberOfColumns));
+
 			// Misc options
 			writer.write(String.format(Locale.US, "int cofi.useOffset 0%n"));
 			writer.write(String.format(Locale.US, "int cofi.useGraphkernel 0%n"));
@@ -106,7 +115,7 @@ public class CofiConfig {
 			// Adaptive regularization
 			writer.write(String.format(Locale.US, "int cofi.useAdaptiveRegularization 0%n"));
 			writer.write(String.format(Locale.US, "int cofi.adaptiveRegularization.uExponent 0%n"));
-			writer.write(String.format(Locale.US, "int cofi.adaptiveRegularization.wExponent 0.5%n"));
+			writer.write(String.format(Locale.US, "double cofi.adaptiveRegularization.wExponent 0.5%n"));
 
 			// Iteration Control
 			writer.write(String.format(Locale.US, "double cofi.minProgress %f%n", minProgress));

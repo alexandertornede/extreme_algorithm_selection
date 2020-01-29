@@ -37,8 +37,7 @@ public class RandomDyadRankingDatasetGenerator implements DyadRankingTrainingDat
 	}
 
 	@Override
-	public DyadRankingDataset generateTrainingDataset(List<Integer> trainingDatasetIds) {
-		List<Integer> pipelineIds = pipelinePerformanceStorage.getPipelineIds();
+	public DyadRankingDataset generateTrainingDataset(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds) {
 		DyadRankingDataset dataset = new DyadRankingDataset();
 		for (int datasetId : trainingDatasetIds) {
 			for (int i = 0; i < numberOfRankingsPerTrainingDataset; i++) {
@@ -46,7 +45,7 @@ public class RandomDyadRankingDatasetGenerator implements DyadRankingTrainingDat
 				Set<Double> performancesSeen = new HashSet<>(lengthOfRanking);
 				List<Pair<Dyad, Double>> dyadPerformancePairsOfRanking = new ArrayList<>(lengthOfRanking);
 				while (pipelineIdsToUse.size() < lengthOfRanking) {
-					int randomPipelineId = pipelineIds.get(random.nextInt(pipelineIds.size()));
+					int randomPipelineId = trainingPipelineIds.get(random.nextInt(trainingPipelineIds.size()));
 					if (!pipelineIdsToUse.contains(randomPipelineId)) {
 						double performanceOfId = pipelinePerformanceStorage.getPerformanceForPipelineWithIdOnDatasetWithId(randomPipelineId, datasetId);
 						if (performanceOfId > 0 && !performancesSeen.contains(performanceOfId)) {

@@ -8,7 +8,7 @@ public interface IdBasedRanker {
 
 	public void initialize(long randomSeed);
 
-	public void train(List<Integer> trainingDatasetIds);
+	public void train(List<Integer> trainingDatasetIds, List<Integer> trainingPipelineIds);
 
 	public List<Pair<Integer, Double>> getRankingOfPipelinesOnDataset(List<Integer> pipelineIdsToRank, int datasetId);
 
