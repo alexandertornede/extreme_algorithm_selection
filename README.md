@@ -64,6 +64,12 @@ db.database = databasename
 db.table = tableWhereToPutTheResults
 db.ssl = true
 
+amount_cpus=1 #amount of CPUs you want to use for parallization
+folds_on_datasets=true
+folds_on_algorithms=false
+
+approaches = alors_regression,alors_ndcg,average_rank,average_performance,1-nn,2-nn,average_performance,1-nn,2-nn,dyad_ranking,per_algorithm_regression,dyadic_feature_regression,oracle,random
+
 dataset_ids = 3, 40966, 6, 11, 12, 14, 15, 40975, 16, 18, 40978, 40979, 40982, 22, 23, 40983, 151, 40984, 1049, 1050, 28, 29, 1053, 31, 32, 40994, 37, 38, 4134, 1063, 1067, 1068, 44, 300, 46, 50, 307, 40499, 1461, 1462, 54, 182, 4534, 1590, 1464, 4538, 188, 6332, 1468, 1475, 41027, 1478, 1480, 458, 1485, 1486, 1487, 1489, 23381, 469, 1494, 1497, 40668, 1501, 23517, 40670, 1510, 40701
 ```
 
