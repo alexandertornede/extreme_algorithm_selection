@@ -4,16 +4,9 @@ This repository holds the code for our IJCAI submission with the title "Extreme 
 by Alexander Tornede, Marcel Wever and Eyke Hüllermeier. 
 
 ## Abstract
-Algorithm selection (AS) deals with selecting an algorithm from a set of candidate algorithms most suitable for a 
-specific instance of an algorithmic problem, e.g., choosing solvers for SAT problems. Standard benchmark suites 
-for AS, such as ASlib, usually comprise candidate sets consisting of at most tens of algorithms. Motivated by the 
-rise of automated machine learning, i.e., the automatic selection of machine learning algorithms for specific datasets, 
-we consider AS problems with thousands of candidate algorithms in a setting we call _extreme algorithm selection (XAS)_, 
-and investigate the ability of state-of-the-art AS approaches to scale with the size of such a set. 
-This includes collaborative filtering as well as methods based on regression and ranking. 
-Moreover, we propose the use of dyadic approaches, in which both problem instances as well as algorithms are represented 
-in terms of feature information. In our evaluation study, we find that the latter are capable of dealing with the XAS 
-setting and improve over the state of the art in various metrics.
+Algorithm selection (AS) deals with selecting an algorithm from a fixed set of candidate algorithms most suitable for a specific instance of an algorithmic problem, e.g., choosing solvers for SAT problems. Benchmark suites for AS usually comprise candidate sets consisting of at most tens of algorithms, whereas in combined algorithm selection and hyperparameter optimization problems the number of candidates becomes intractable, impeding to learn effective meta-models and thus requiring costly online performance evaluations.
+Therefore, here we propose the setting of extreme algorithm selection (XAS) where we consider fixed sets of thousands of candidate algorithms, facilitating meta learning.
+We assess the applicability of state-of-the-art AS techniques to the XAS setting and propose approaches leveraging a dyadic feature representation in which both problem instances and algorithms are described. We find the latter to improve significantly over the current state of the art in various metrics.
 
 ## Benchmark Dataset
 We created a benchmark dataset with over 1200 machine learning classification algorithms represented by feature information and evaluated them on almost 68 classification datasets from the [OpenML CC-18 benchmark](https://docs.openml.org/benchmark/#openml-cc18). This dataset contains both feature information for algorithms and datasets. Furthermore, the accuracy of the classification algorithms on the datasets is reported. 
