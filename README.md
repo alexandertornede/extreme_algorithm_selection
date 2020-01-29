@@ -1,6 +1,6 @@
-# Code for the ECAI 2020 submission: Extreme Algorithm Selection with Dyadic Feature Representation
+# Code for the IJCAI 2020 submission: Extreme Algorithm Selection with Dyadic Feature Representation
 
-This repository holds the code for the ECAI 2020 submission #1679 with the title "Extreme Algorithm Selection with Dyadic Feature Representation"
+This repository holds the code for our IJCAI submission with the title "Extreme Algorithm Selection with Dyadic Feature Representation"
 by Alexander Tornede, Marcel Wever and Eyke Hüllermeier. 
 
 ## Abstract
