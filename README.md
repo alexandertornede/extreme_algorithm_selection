@@ -105,4 +105,4 @@ For generating the exact performance table found in the paper, including the res
 
 ## Configuration Details
 The following configuration details did not find a spot within the paper: 
-* The neural network we use to model the utility function for the dyad ranking approach is implemented in [DL4J](https://deeplearning4j.org/) and uses the parameters given in the configuration file called `plnet.properties` described earlier.
+* The neural network we use to model the utility function for the dyad ranking approach is implemented in [DL4J](https://deeplearning4j.konduit.ai/) and uses the parameters given in the configuration file called `plnet.properties` described earlier.
